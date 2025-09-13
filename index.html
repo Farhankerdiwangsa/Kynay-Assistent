@@ -6,10 +6,7 @@
     <title>Kynay Assistant</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- AOS (Animate On Scroll) -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <!-- GSAP -->
+    <!-- GSAP - For smooth transitions and animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -19,8 +16,8 @@
         :root {
             --primary-color: #8b5cf6;
             --primary-hover: #7c3aed;
-            --secondary-color: #3b82f6;
-            --secondary-hover: #2563eb;
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
         }
         
         body {
@@ -28,6 +25,7 @@
             transition: background-color 0.5s ease;
         }
         
+        /* Styles for Chat Bubbles */
         .chat-bubble-user {
             border-top-right-radius: 0;
             background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
@@ -35,15 +33,14 @@
             box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
         }
         
-        /* [MODIFIED] Styles for the AI chat bubble for better text formatting */
         .chat-bubble-ai {
             background-color: #ffffff;
             color: #1f2937;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             border: 1px solid #e5e7eb;
             padding: 1rem;
             max-width: 65ch;
-            border-radius: 0.75rem; /* rounded-xl */
+            border-radius: 0.75rem;
             border-top-left-radius: 0;
         }
 
@@ -74,54 +71,45 @@
             margin-top: 0.5rem;
         }
         
+        /* Simple Animation Classes */
         .fade-in { animation: fadeIn 0.5s ease-in-out; }
         .slide-in-right { animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         .slide-in-left { animation: slideInLeft 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .scale-in { animation: scaleIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
         
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideInRight { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideInLeft { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         
-        .premium-shine { position: relative; overflow: hidden; }
-        .premium-shine::after {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient( to bottom right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) );
-            transform: rotate(30deg); animation: shine 3s infinite linear; opacity: 0;
+        /* Shine Effect */
+        .shine-effect { position: relative; overflow: hidden; }
+        .shine-effect::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 20px; height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            animation: subtle-shine 6s infinite linear;
+            animation-delay: var(--shine-delay, 0s);
         }
-        @keyframes shine { 0% { opacity: 0; transform: translateX(-100%) rotate(30deg); } 20% { opacity: 1; } 40% { opacity: 0.5; } 100% { opacity: 0; transform: translateX(100%) rotate(30deg); } }
-        
-        .dot-animation .dot {
-            animation: blink 1.4s infinite both;
-        }
-        .dot-animation .dot:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        .dot-animation .dot:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-        @keyframes blink {
-            0%, 80%, 100% {
-                opacity: 0;
-            }
-            40% {
-                opacity: 1;
-            }
+        @keyframes subtle-shine {
+            from { left: -50%; } to { left: 120%; }
         }
         
+        /* AI Thinking Dots Animation */
+        .dot-animation .dot { animation: blink 1.4s infinite both; }
+        .dot-animation .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot-animation .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
+        
+        /* Chat List Item Styles */
         .chat-item { transition: all 0.3s ease; border-left: 3px solid transparent; position: relative; }
         .chat-item:hover { background-color: rgba(139, 92, 246, 0.08); border-left-color: var(--primary-color); }
         .chat-item.active { background-color: rgba(139, 92, 246, 0.12); border-left-color: var(--primary-color); }
         
-        .chat-action-btn {
-            transition: transform 0.2s ease-in-out;
-            border-radius: 9999px; /* Memastikan tombol bulat untuk efek ripple */
-        }
-        .chat-action-btn:hover {
-            transform: scale(1.2) rotate(5deg);
-        }
-        
+        .chat-action-btn { transition: all 0.2s ease-in-out; }
+        .chat-action-btn:hover { transform: scale(1.15); }
+        .chat-action-btn.rename-btn:hover { color: var(--primary-color); }
+        .chat-action-btn.delete-btn:hover { color: var(--danger-color); }
+
+        /* Scrollbar Styles */
         .premium-scrollbar::-webkit-scrollbar { width: 6px; }
         .premium-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .premium-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
@@ -129,62 +117,52 @@
         .dark .premium-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
         .dark .premium-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
         
-        .theme-transition * { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
-        
+        /* Ripple Effect on Click */
         .ripple { position: relative; overflow: hidden; }
         .ripple-effect { position: absolute; border-radius: 50%; background-color: rgba(255, 255, 255, 0.4); transform: scale(0); animation: ripple-animation 0.6s linear; }
         @keyframes ripple-animation { to { transform: scale(4); opacity: 0; } }
 
-        .initial-welcome-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+        /* Welcome Message Styles */
+        .initial-welcome-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; animation: fadeIn 0.8s ease-out; }
+        .initial-welcome-emoji { font-size: 3rem; animation: bounce-light 2s ease-in-out infinite; }
+        .initial-welcome-headline { font-size: 1.75rem; font-weight: 700; color: #1f2937; animation: fade-slide-in 0.6s 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+        .dark .initial-welcome-headline { color: #f9fafb; }
+        .initial-welcome-subtext { font-size: 1rem; color: #6b7280; margin-top: 0.5rem; animation: fade-slide-in 0.6s 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
+        .dark .initial-welcome-subtext { color: #d1d5db; }
+        @keyframes bounce-light { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-15px); } 60% { transform: translateY(-7px); } }
+        @keyframes fade-slide-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Shake animation for login error */
+        @keyframes shake {
+          10%, 90% { transform: translate3d(-1px, 0, 0); }
+          20%, 80% { transform: translate3d(2px, 0, 0); }
+          30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+          40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .shake-error {
+          animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Footer Shine Animation */
+        .footer-shine::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150px;
+            width: 100px;
             height: 100%;
-            animation: fadeIn 0.8s ease-out;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: skewX(-25deg);
+            animation: footer-shine-anim 8s linear infinite;
         }
-        .initial-welcome-emoji {
-            font-size: 3rem;
-            animation: bounce-light 2s ease-in-out infinite;
-        }
-        .initial-welcome-headline {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #1f2937;
-            animation: fade-slide-in 0.6s 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-        }
-        .dark .initial-welcome-headline {
-            color: #f9fafb;
-        }
-        .initial-welcome-subtext {
-            font-size: 1rem;
-            color: #6b7280;
-            margin-top: 0.5rem;
-            animation: fade-slide-in 0.6s 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-        }
-        .dark .initial-welcome-subtext {
-            color: #d1d5db;
+        @keyframes footer-shine-anim {
+          0% { left: -150px; }
+          100% { left: 120%; }
         }
 
-        @keyframes bounce-light {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-15px); }
-            60% { transform: translateY(-7px); }
-        }
-
-        @keyframes fade-slide-in {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
     </style>
     <script>
+        // Konfigurasi Tailwind CSS
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -192,109 +170,107 @@
                     colors: {
                         primary: '#8b5cf6',
                         'primary-hover': '#7c3aed',
-                        secondary: '#3b82f6',
-                        'secondary-hover': '#2563eb',
+                        danger: '#ef4444',
+                        'danger-hover': '#dc2626',
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-300 theme-transition">
-    <!-- Login/Register Section (Unchanged) -->
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-300">
+    
+    <!-- [NEW] Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] space-y-2 w-full max-w-xs"></div>
+
+    <!-- Login/Register Section -->
     <div id="auth-section" class="min-h-screen flex items-center justify-center px-4 py-12">
-        <div class="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 p-10 rounded-xl shadow-2xl" data-aos="fade-up">
-            <div>
-                <div class="flex justify-center mb-4">
-                  <img src="https://files.catbox.moe/qgg4mt.png" 
-                       alt="Kynay Assistant Logo" 
-                       class="max-w-xs w-auto h-16 object-contain mx-auto">
+        <div class="max-w-md w-full">
+            <div id="auth-card" class="bg-white dark:bg-gray-800 p-8 md:p-10 rounded-xl shadow-2xl overflow-hidden">
+                <div id="auth-content">
+                    <div class="flex justify-center mb-4">
+                      <img src="https://files.catbox.moe/qgg4mt.png" 
+                           alt="Kynay Assistant Logo" 
+                           class="w-auto h-16 object-contain mx-auto">
+                    </div>
+                    <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                      Sign in or create an account
+                    </p>
+                    <form class="mt-8 space-y-4" id="auth-form" novalidate>
+                        <input type="hidden" id="captcha" name="captcha" value="bypass-captcha">
+                        
+                        <div>
+                            <input id="username" name="username" type="text" class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors duration-300" placeholder="Username">
+                            <div id="username-error" class="text-red-500 text-xs mt-1 h-4 transition-all"></div>
+                        </div>
+
+                        <div>
+                            <input id="password" name="password" type="password" class="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-700 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm transition-colors duration-300" placeholder="Password">
+                            <div id="password-error" class="text-red-500 text-xs mt-1 h-4 transition-all"></div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <label for="remember-me" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">Remember me</label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" id="auth-button" class="group relative w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 transform hover:scale-105 ripple h-12 shine-effect">
+                                <span class="button-text">Sign In</span>
+                                <span class="button-loader hidden">
+                                    <i class="fas fa-spinner fa-spin text-lg"></i>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="button" id="toggle-auth-mode" class="mt-4 text-sm text-primary hover:text-primary-hover transition-colors duration-300">
+                                Need to create an account? Register now
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <p class="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                  Sign in or create an account
-                </p>
             </div>
-            <form class="mt-6 space-y-6 max-w-sm mx-auto" id="auth-form">
-                <input type="hidden" id="captcha" name="captcha" value="bypass-captcha">
-                <div class="rounded-md shadow-sm -space-y-px">
-                    <div>
-                        <input id="username" name="username" type="text" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-700 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm" placeholder="Username">
-                    </div>
-                    <div>
-                        <input id="password" name="password" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white dark:bg-gray-700 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm" placeholder="Password">
-                    </div>
-                </div>
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
-                        <label for="remember-me" class="ml-2 block text-sm text-gray-900 dark:text-gray-300">Remember me</label>
-                    </div>
-                </div>
-                <div>
-                    <button type="submit" id="auth-button" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-300 transform hover:scale-105 ripple">
-                        Sign In
-                    </button>
-                </div>
-                <div class="text-center">
-                    <button type="button" id="toggle-auth-mode" class="mt-4 text-sm text-primary hover:text-primary-hover transition-colors duration-300">
-                        Need to create an account? Register now
-                    </button>
-                </div>
-            </form>
-            <div id="auth-error" class="hidden mt-4 p-3 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200 rounded-md text-sm"></div>
         </div>
     </div>
 
-    <!-- Dashboard Section (Unchanged) -->
+    <!-- Dashboard Section -->
     <div id="dashboard-section" class="hidden h-screen flex flex-col bg-white dark:bg-gray-900">
         <!-- Navbar -->
-        <nav class="bg-white dark:bg-gray-800 shadow-lg py-3 px-6 flex justify-between items-center premium-shine z-20">
+        <nav class="bg-white dark:bg-gray-800 shadow-md py-3 px-6 flex justify-between items-center z-20">
             <div class="flex items-center">
-                <button id="sidebar-toggle" class="text-gray-600 dark:text-gray-300 mr-4 focus:outline-none md:hidden ripple">
-                    <i class="fas fa-bars"></i>
+                <button id="sidebar-toggle" class="text-gray-600 dark:text-gray-300 focus:outline-none md:hidden ripple p-2 rounded-full">
+                    <i class="fas fa-bars text-xl"></i>
                 </button>
             </div>
-            <div class="flex flex-1 justify-center items-center">
-              <img src="https://files.catbox.moe/qgg4mt.png" 
-                   alt="Kynay Assistant Logo" 
-                   class="w-full h-16 object-cover">
+            <div class="flex-1 text-center">
+                <h1 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Kynay Assistant</h1>
             </div>
-            <div class="flex items-center space-x-4">
-                <button id="create-image-btn" class="hidden md:flex items-center px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-all duration-300 transform hover:scale-105 ripple">
-                     <i class="fas fa-plus mr-1"></i> Create Image
-                </button>
-                <button id="edit-image-btn" class="hidden md:flex items-center px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all duration-300 transform hover:scale-105 ripple">
-                    <i class="fas fa-edit mr-1"></i> Edit Image
-                </button>
-            </div>
+            <div class="w-8 md:w-0"></div>
         </nav>
 
         <!-- Main Content -->
         <div class="flex flex-1 overflow-hidden">
-            <!-- START: Sidebar (Unchanged) -->
-            <div id="sidebar" class="w-72 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out md:translate-x-0 -translate-x-full fixed md:relative inset-y-0 left-0 z-40 md:z-auto">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="w-72 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col transform transition-transform duration-300 ease-in-out md:translate-x-0 -translate-x-full fixed md:relative inset-y-0 left-0 z-40 md:z-auto">
                 
                 <div class="p-4">
-                    <div class="flex justify-center p-4 premium-shine rounded-lg shadow-md">
-                      <img src="https://files.catbox.moe/qgg4mt.png"
-                           alt="Kynay Assistant Logo"
-                           class="w-full h-auto object-contain">
+                    <div class="flex justify-center p-4 shine-effect rounded-lg shadow-md bg-white dark:bg-gray-700" style="--shine-delay: 1s;">
+                      <img src="https://files.catbox.moe/qgg4mt.png" alt="Kynay Assistant Logo" class="w-full h-auto object-contain">
                     </div>
                 </div>
                 
                 <div class="px-4">
-                    <button id="new-chat-btn"
-                            class="w-full flex items-center justify-center px-4 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg shadow-md transition-colors duration-300 ripple premium-shine">
+                    <button id="new-chat-btn" class="w-full flex items-center justify-center px-4 py-2 bg-primary hover:bg-primary-hover text-white font-semibold rounded-lg shadow-md transition-colors duration-300 ripple shine-effect">
                       <i class="fas fa-plus mr-2"></i> New Chat
                     </button>
                 </div>
 
                 <div class="mt-4 px-4">
                   <div class="relative">
-                    <input type="text"
-                           id="search-chats-input"
-                           placeholder="Search chats..."
-                           class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
+                    <input type="text" id="search-chats-input" placeholder="Search chats..." class="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
                       <i class="fas fa-search"></i>
                     </span>
@@ -305,31 +281,27 @@
                   <!-- Chat items dynamically injected here -->
                 </div>
 
-                <div class="p-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
+                <div class="p-4 border-t border-gray-200 dark:border-gray-700">
                      <div class="flex items-center justify-between">
                         <button id="logout-btn" class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-300 hover:text-red-500 dark:hover:text-red-400 transition-colors duration-300 ripple p-2 rounded-md">
                            <i class="fas fa-sign-out-alt"></i>
                            <span>Logout</span>
                         </button>
                         <button id="theme-toggle" class="p-2 bg-gray-200 dark:bg-gray-700 rounded-full transition-colors duration-300 ripple">
-                            <svg id="theme-icon-dark" class="w-5 h-5 text-gray-800 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                            <svg id="theme-icon-light" class="w-5 h-5 text-yellow-500 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                            <svg id="theme-icon-dark" class="w-5 h-5 text-gray-800 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                            <svg id="theme-icon-light" class="w-5 h-5 text-yellow-500 hidden" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 16.464A1 1 0 106.465 15.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm-1.414-2.121a1 1 0 011.414 0l.707.707a1 1 0 11-1.414 1.414l-.707-.707a1 1 0 010-1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path></svg>
                         </button>
                      </div>
                 </div>
-            </div>
-            <!-- END: Sidebar -->
-
+            </aside>
+            
             <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden hidden"></div>
 
             <!-- Chat Area -->
-            <div class="flex-1 flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-900">
-                
+            <main class="flex-1 flex flex-col overflow-hidden bg-gray-100 dark:bg-gray-900">
                 <div class="flex-1 overflow-y-auto p-4 space-y-4 premium-scrollbar" id="messages-container">
                     <!-- Welcome Message or Chat Bubbles appear here -->
                 </div>
-
-                <!-- Input Area (Unchanged) -->
                 <div class="border-t border-gray-200 dark:border-gray-700 p-4 bg-white dark:bg-gray-800">
                     <form id="message-form" class="flex items-center space-x-2">
                          <button type="button" id="attach-file-btn" class="p-3 text-gray-400 hover:text-primary dark:hover:text-primary transition-colors duration-300 ripple rounded-full">
@@ -346,14 +318,16 @@
                         </button>
                     </form>
                 </div>
-            </div>
+            </main>
         </div>
     </div>
 
-    <!-- All modals are kept as they are for functionality (Unchanged) -->
-    <div id="create-image-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"></div>
-    <div id="edit-image-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"></div>
-    <div id="image-result-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"></div>
+    <!-- Footer -->
+    <footer id="main-footer" class="fixed bottom-0 left-0 w-full bg-gray-800 dark:bg-black text-white text-xs text-center py-1 z-50 footer-shine hidden">
+        © Kynay AI — Created by Farhan Kertadiwangsa
+    </footer>
+
+    <!-- Modals -->
     <div id="rename-chat-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md transform scale-95 transition-transform duration-300">
             <div class="p-6">
@@ -364,10 +338,10 @@
                         <input type="text" id="chat-title" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-primary focus:border-primary dark:bg-gray-700 dark:text-white" placeholder="Enter chat title">
                     </div>
                     <div class="flex justify-end space-x-3">
-                        <button type="button" id="cancel-rename-chat" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors duration-300 ripple">
+                        <button type="button" id="cancel-rename-chat" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors duration-300 ripple">
                             Cancel
                         </button>
-                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition-colors duration-300 ripple">
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-hover rounded-md transition-colors duration-300 ripple shine-effect">
                             Rename
                         </button>
                     </div>
@@ -375,20 +349,34 @@
             </div>
         </div>
     </div>
-    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"></div>
-    <div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden"></div>
-
+    
+    <div id="delete-chat-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm transform scale-95 transition-transform duration-300 p-6 text-center">
+            <div class="text-danger mb-4">
+                <i class="fas fa-exclamation-triangle fa-3x"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Delete Chat</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">Are you sure you want to permanently delete this chat? This action cannot be undone.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="cancel-delete-chat" class="px-6 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 rounded-md transition-colors duration-300 ripple">
+                    Cancel
+                </button>
+                <button id="confirm-delete-chat" class="px-6 py-2 text-sm font-medium text-white bg-danger hover:bg-danger-hover rounded-md transition-colors duration-300 ripple shine-effect">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // Constants and global variables
         const API_BASE_URL = '/api';
         let currentSessionId = null;
         let isRegistering = false;
         let isSidebarOpen = window.innerWidth >= 768;
-        let confirmCallback = null;
-        let recognition = null; // For Web Speech API
+        let recognition = null; 
 
         document.addEventListener('DOMContentLoaded', function() {
-            AOS.init({ duration: 800, easing: 'ease-out-quad', once: true });
             initTheme();
             checkAuthStatus();
             setupEventListeners();
@@ -397,137 +385,267 @@
             setupSpeechRecognition();
         });
         
-        // --- CORE LOGIC IMPLEMENTATION ---
+        // --- UI HELPER FUNCTIONS ---
 
         /**
-         * Checks if a user token exists. If so, initializes the dashboard.
-         * Otherwise, shows the authentication screen.
+         * Displays a toast notification.
+         * @param {('success'|'error'|'info')} type - The type of toast.
+         * @param {string} message - The message to display.
          */
-        function checkAuthStatus() {
-            const token = localStorage.getItem('token');
-            if (token) {
-                showDashboard();
-                initializeDashboardOnReload(); 
+        function showToast(type = 'info', message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            let iconClass, colorClasses;
+
+            switch (type) {
+                case 'success':
+                    iconClass = 'fa-check-circle';
+                    colorClasses = 'text-green-500 bg-green-100 dark:bg-gray-800 dark:text-green-400';
+                    break;
+                case 'error':
+                    iconClass = 'fa-times-circle';
+                    colorClasses = 'text-red-500 bg-red-100 dark:bg-gray-800 dark:text-red-400';
+                    break;
+                default:
+                    iconClass = 'fa-info-circle';
+                    colorClasses = 'text-blue-500 bg-blue-100 dark:bg-gray-800 dark:text-blue-400';
+            }
+
+            toast.className = `flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow-lg dark:text-gray-400 dark:bg-gray-800`;
+            toast.innerHTML = `
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 ${colorClasses} rounded-lg">
+                    <i class="fas ${iconClass}"></i>
+                </div>
+                <div class="ml-3 text-sm font-normal">${message}</div>
+                <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700">
+                    <span class="sr-only">Close</span>
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            gsap.from(toast, { opacity: 0, x: 50, duration: 0.5, ease: 'back.out(1.7)' });
+
+            const removeToast = () => {
+                gsap.to(toast, { opacity: 0, x: 50, duration: 0.3, onComplete: () => toast.remove() });
+            };
+            
+            toast.querySelector('button').addEventListener('click', removeToast);
+            setTimeout(removeToast, 5000);
+        }
+
+        function setButtonLoading(button, isLoading) {
+            const buttonText = button.querySelector('.button-text');
+            const buttonLoader = button.querySelector('.button-loader');
+            if (isLoading) {
+                button.disabled = true;
+                buttonText.classList.add('hidden');
+                buttonLoader.classList.remove('hidden');
             } else {
-                showAuthSection();
+                button.disabled = false;
+                buttonText.classList.remove('hidden');
+                buttonLoader.classList.add('hidden');
             }
         }
 
-        /**
-         * Main handler for login and registration.
-         */
+        function showInputError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(`${inputId}-error`);
+            input.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+            input.classList.remove('focus:border-primary', 'focus:ring-primary');
+            errorDiv.textContent = message;
+            gsap.from(errorDiv, { y: -10, opacity: 0, duration: 0.3 });
+        }
+
+        function clearInputErrors() {
+            ['username', 'password'].forEach(inputId => {
+                const input = document.getElementById(inputId);
+                const errorDiv = document.getElementById(`${inputId}-error`);
+                if (input) {
+                    input.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                    input.classList.add('focus:border-primary', 'focus:ring-primary');
+                }
+                if (errorDiv) errorDiv.textContent = '';
+            });
+        }
+
+        // --- CORE LOGIC IMPLEMENTATION ---
+
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                showDashboard(false); // No animation on initial load
+                initializeDashboardOnReload(); 
+            } else {
+                showAuthSection(false); // No animation on initial load
+            }
+        }
+
         async function handleAuth(e) {
             e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const captcha = document.getElementById('captcha').value;
-            const errorDiv = document.getElementById('auth-error');
+            clearInputErrors();
             
-            if (!username || !password || !captcha) return showError(errorDiv, 'All fields are required');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const authButton = document.getElementById('auth-button');
+            const authCard = document.getElementById('auth-card');
+            
+            let isValid = true;
+            if (usernameInput.value.trim() === '') {
+                showInputError('username', 'Username cannot be empty.');
+                isValid = false;
+            }
+            if (passwordInput.value.trim() === '') {
+                showInputError('password', 'Password cannot be empty.');
+                isValid = false;
+            }
+            if (!isValid) return;
+
+            setButtonLoading(authButton, true);
 
             try {
                 const endpoint = isRegistering ? '/auth/register' : '/auth/login';
                 const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, captcha })
+                    body: JSON.stringify({ 
+                        username: usernameInput.value, 
+                        password: passwordInput.value, 
+                        captcha: 'bypass-captcha' 
+                    })
                 });
                 const data = await response.json();
                 
                 if (data.ok) {
+                    // [REMOVED] Toast for successful login/register for a cleaner transition
                     localStorage.setItem('token', data.token);
                     localStorage.setItem('user', JSON.stringify(data.user));
                     
-                    gsap.to('#auth-section', { opacity: 0, duration: 0.5, onComplete: () => {
-                        showDashboard();
-                        initializeDashboardOnLogin();
-                    }});
+                    // Animate out the auth section
+                    gsap.to('#auth-section', { 
+                        opacity: 0, 
+                        y: -50, 
+                        duration: 0.5, 
+                        ease: 'power2.in',
+                        onComplete: () => {
+                            // After animation, show and animate in the dashboard
+                            showDashboard(true);
+                            initializeDashboardOnLogin();
+                        }
+                    });
                 } else {
-                    showError(errorDiv, data.error || 'Authentication failed');
+                    showToast('error', data.error || 'Authentication failed');
+                    authCard.classList.add('shake-error');
+                    setTimeout(() => authCard.classList.remove('shake-error'), 820);
                 }
             } catch (error) {
-                showError(errorDiv, 'Network error. Please try again.');
+                showToast('error', 'Network error. Please try again.');
+            } finally {
+                setButtonLoading(authButton, false);
             }
         }
         
-        /**
-         * Flow for a fresh login: Create a new chat session automatically and load it.
-         */
-        async function initializeDashboardOnLogin() {
-            try {
-                const newSession = await createNewSession(false); 
-                if (newSession) {
-                    currentSessionId = newSession.id;
-                    const allSessions = await fetchAllSessions();
-                    renderChatList(allSessions);
-                    await loadChatSession(currentSessionId);
-                } else {
-                     resetChatUI(); 
+        function handleLogout() {
+            // Animate out the dashboard
+            gsap.to('#dashboard-section', {
+                opacity: 0,
+                y: -50,
+                duration: 0.5,
+                ease: 'power2.in',
+                onComplete: () => {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    currentSessionId = null;
+                    document.getElementById('chat-sessions-list').innerHTML = '';
+                    document.getElementById('messages-container').innerHTML = '';
+                    // After animation, show and animate in the auth section
+                    showAuthSection(true);
                 }
-            } catch (error) {
-                console.error("Initialization failed:", error);
-                resetChatUI();
+            });
+        }
+        
+        function showAuthSection(animated = true) {
+            document.getElementById('dashboard-section').classList.add('hidden');
+            document.getElementById('main-footer').classList.add('hidden');
+            const authSection = document.getElementById('auth-section');
+            authSection.classList.remove('hidden');
+            
+            document.getElementById('auth-form').reset();
+            clearInputErrors();
+            
+            if (animated) {
+                gsap.fromTo(authSection, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+            } else {
+                gsap.set(authSection, { opacity: 1, y: 0 });
+            }
+        }
+        
+        function showDashboard(animated = true) {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('main-footer').classList.remove('hidden');
+            const dashboardSection = document.getElementById('dashboard-section');
+            dashboardSection.classList.remove('hidden');
+
+            if (animated) {
+                gsap.fromTo(dashboardSection, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' });
+            } else {
+                gsap.set(dashboardSection, { opacity: 1, y: 0 });
             }
         }
 
-        /**
-         * Flow for page reload: Fetch all chats and load the most recent one.
-         */
-        async function initializeDashboardOnReload() {
-            try {
-                const sessions = await fetchAllSessions();
+        // --- DASHBOARD AND CHAT LOGIC ---
+
+        function initializeDashboardOnLogin() {
+            createNewSession(false).then(newSession => {
+                if (newSession) {
+                    currentSessionId = newSession.id;
+                    fetchAllSessions().then(renderChatList);
+                    loadChatSession(currentSessionId);
+                } else {
+                     resetChatUI(); 
+                }
+            }).catch(error => {
+                console.error("Initialization failed:", error);
+                resetChatUI();
+            });
+        }
+
+        function initializeDashboardOnReload() {
+            fetchAllSessions().then(sessions => {
                 renderChatList(sessions);
                 if (sessions && sessions.length > 0) {
                     const lastSession = sessions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
                     currentSessionId = lastSession.id;
-                    await loadChatSession(currentSessionId);
+                    loadChatSession(currentSessionId);
                 } else {
-                    await initializeDashboardOnLogin();
+                    initializeDashboardOnLogin();
                 }
-            } catch (error) {
+            }).catch(error => {
                 console.error("Reload initialization failed:", error);
                 resetChatUI();
-            }
+            });
         }
 
-
-        /**
-         * Handles clicking the 'New Chat' button.
-         */
         async function handleNewChatClick() {
-            try {
-                const newSession = await createNewSession(true); 
-                if (newSession) {
-                    currentSessionId = newSession.id;
-                    await loadChatSession(currentSessionId);
-                }
-            } catch(e) {
-                 console.error("Failed to create new chat from button", e);
-            }
+            const newSession = await createNewSession(true); 
+            if (newSession) currentSessionId = newSession.id;
+            await loadChatSession(currentSessionId);
         }
 
-        // --- API & DATA FUNCTIONS ---
-
-        /**
-         * Fetches all chat sessions for the current user.
-         */
         async function fetchAllSessions() {
             const token = localStorage.getItem('token');
             try {
-                const response = await fetch(`${API_BASE_URL}/api/session`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await fetch(`${API_BASE_URL}/api/session`, { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await response.json();
-                return data.ok ? data.sessions : null;
+                return data.ok ? data.sessions : [];
             } catch (error) {
                 console.error('Error fetching sessions:', error);
-                return null;
+                return [];
             }
         }
         
-        /**
-         * Creates a new chat session on the backend.
-         */
         async function createNewSession(reloadList = true) {
             const token = localStorage.getItem('token');
             try {
@@ -538,9 +656,7 @@
                 });
                 const data = await response.json();
                 if (data.ok) {
-                    if (reloadList) {
-                        renderChatList(data.sessions);
-                    }
+                    if (reloadList) renderChatList(data.sessions);
                     return data.session;
                 }
                 return null;
@@ -550,9 +666,6 @@
             }
         }
 
-        /**
-         * Loads a specific chat session's messages and displays them.
-         */
         async function loadChatSession(sessionId) {
             if (!sessionId) return resetChatUI();
             const token = localStorage.getItem('token');
@@ -562,19 +675,15 @@
             if (activeEl) activeEl.classList.add('active');
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/session/${sessionId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await fetch(`${API_BASE_URL}/api/session/${sessionId}`, { headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await response.json();
                 
                 if (data.ok) {
                     currentSessionId = sessionId;
                     document.getElementById('message-input').disabled = false;
                     document.getElementById('send-btn').disabled = false;
-                    
                     renderMessages(data.session.messages);
                 } else {
-                    console.error('Failed to load chat session details');
                     resetChatUI();
                 }
             } catch (error) {
@@ -583,9 +692,6 @@
             }
         }
 
-        /**
-         * Sends a message to the backend.
-         */
         async function sendMessage(e) {
             e.preventDefault();
             if (!currentSessionId) return;
@@ -597,34 +703,15 @@
             const messagesContainer = document.getElementById('messages-container');
             const isFirstMessage = messagesContainer.querySelector('#initial-welcome') !== null || messagesContainer.children.length === 0;
             
-            const userMessage = { id: Date.now().toString(), role: 'user', content: message, ts: Date.now() };
-            addMessageToUI(userMessage);
+            addMessageToUI({ role: 'user', content: message, ts: Date.now() });
             messageInput.value = '';
             
-            if (isFirstMessage) {
-                const newTitle = message || 'New Chat'; 
-                autoRenameSession(currentSessionId, newTitle);
-            }
+            if (isFirstMessage) autoRenameSession(currentSessionId, message);
 
             const thinkingIndicator = document.createElement('div');
             thinkingIndicator.id = 'ai-thinking-indicator';
             thinkingIndicator.className = 'flex justify-start mb-4 slide-in-left'; 
-            thinkingIndicator.innerHTML = `
-                <div class="flex items-center max-w-xs p-3 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-md text-sm">
-<img src="https://files.catbox.moe/ekxl3e.png" 
-     alt="AI Logo" 
-     class="w-4 h-4 object-contain mr-2">
-
-<span class="flex items-center text-gray-800 dark:text-gray-200">
-    AI is thinking
-    <span class="dot-animation ml-1 flex">
-        <span class="dot">.</span>
-        <span class="dot">.</span>
-        <span class="dot">.</span>
-    </span>
-</span>
-</div>
-            `;
+            thinkingIndicator.innerHTML = `<div class="flex items-center max-w-xs p-3 bg-gray-200 dark:bg-gray-700 rounded-lg shadow-md text-sm"><img src="https://files.catbox.moe/ekxl3e.png" alt="AI Logo" class="w-4 h-4 object-contain mr-2"><span class="flex items-center text-gray-800 dark:text-gray-200">AI is thinking<span class="dot-animation ml-1 flex"><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span></span></div>`;
             messagesContainer.appendChild(thinkingIndicator);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
             
@@ -636,209 +723,103 @@
                     body: JSON.stringify({ message })
                 });
                 const data = await response.json();
-                if (data.ok) {
-                    addMessageToUI(data.message);
-                } else {
-                    addMessageToUI({ role: 'assistant', content: 'Sorry, I encountered an error.', ts: Date.now() });
-                }
+                addMessageToUI(data.ok ? data.message : { role: 'assistant', content: 'Sorry, I encountered an error.', ts: Date.now() });
             } catch (error) {
                 addMessageToUI({ role: 'assistant', content: 'Network error. Please try again.', ts: Date.now() });
             } finally {
                 const indicator = document.getElementById('ai-thinking-indicator');
-                if (indicator) {
-                    indicator.remove();
-                }
+                if (indicator) indicator.remove();
             }
         }
 
-        // --- UI RENDERING & MANIPULATION ---
-
-        /**
-         * Renders the list of chat sessions in the sidebar.
-         */
         function renderChatList(sessions) {
             const sessionsList = document.getElementById('chat-sessions-list');
             sessionsList.innerHTML = '';
-            
             if (!sessions || sessions.length === 0) {
                 sessionsList.innerHTML = `<p class="text-center text-gray-500 text-sm p-4">No chats yet.</p>`;
                 return;
             }
-            
-            sessions.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(session => {
+            sessions.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach((session, index) => {
                 const sessionElement = createSessionElement(session);
                 sessionsList.appendChild(sessionElement);
-                gsap.from(sessionElement, { opacity: 0, x: -20, duration: 0.3, delay: Math.random() * 0.2 });
+                gsap.from(sessionElement, { opacity: 0, x: -20, duration: 0.3, delay: index * 0.05 });
             });
         }
         
-        /**
-         * Creates a single HTML element for a chat session in the sidebar.
-         */
         function createSessionElement(session) {
             const div = document.createElement('div');
             div.className = 'p-3 mb-2 rounded-lg cursor-pointer chat-item';
-            div.setAttribute('data-session-id', session.id);
-            div.setAttribute('data-title', session.title);
-
-            div.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <div class="flex-1 min-w-0">
-                        <h3 class="font-semibold text-sm text-gray-800 dark:text-white truncate">${session.title}</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">${new Date(session.createdAt).toLocaleDateString()}</p>
-                    </div>
-                    <div class="chat-item-actions flex space-x-1">
-                        <button class="rename-btn chat-action-btn ripple p-1 text-gray-500 hover:text-blue-500" title="Rename"><i class="fas fa-edit fa-xs"></i></button>
-                        <button class="delete-btn chat-action-btn ripple p-1 text-gray-500 hover:text-red-500" title="Delete"><i class="fas fa-trash fa-xs"></i></button>
-                    </div>
-                </div>`;
-            
-            div.addEventListener('click', (e) => {
-                if (!e.target.closest('.chat-item-actions')) {
-                    if (window.innerWidth < 768) toggleSidebar();
-                    loadChatSession(session.id);
-                }
-            });
-            div.querySelector('.rename-btn').addEventListener('click', (e) => { e.stopPropagation(); handleRenameClick(session.id, session.title); });
-            div.querySelector('.delete-btn').addEventListener('click', (e) => { e.stopPropagation(); handleDeleteClick(session.id); });
-
+            div.dataset.sessionId = session.id;
+            div.dataset.title = session.title;
+            // Chat item actions are always visible
+            div.innerHTML = `<div class="flex justify-between items-center"><div class="flex-1 min-w-0"><h3 class="font-semibold text-sm text-gray-800 dark:text-white truncate">${session.title}</h3><p class="text-xs text-gray-500 dark:text-gray-400">${new Date(session.createdAt).toLocaleDateString()}</p></div><div class="chat-item-actions flex space-x-2 pl-2"><button class="rename-btn chat-action-btn ripple p-1 text-gray-500" title="Rename"><i class="fas fa-edit fa-xs"></i></button><button class="delete-btn chat-action-btn ripple p-1 text-gray-500" title="Delete"><i class="fas fa-trash fa-xs"></i></button></div></div>`;
+            div.addEventListener('click', e => !e.target.closest('.chat-item-actions') && (window.innerWidth < 768 && toggleSidebar(), loadChatSession(session.id)));
+            div.querySelector('.rename-btn').addEventListener('click', e => { e.stopPropagation(); handleRenameClick(session.id, session.title); });
+            div.querySelector('.delete-btn').addEventListener('click', e => { e.stopPropagation(); handleDeleteClick(session.id); });
             return div;
         }
 
-        /**
-         * Renders all messages in the main chat area.
-         */
         function renderMessages(messages) {
             const messagesContainer = document.getElementById('messages-container');
             if (!messages || messages.length === 0) {
                 showInitialWelcomeMessage();
                 return;
             }
-            
             messagesContainer.innerHTML = '';
             messages.forEach(message => addMessageToUI(message, false));
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
         
-        /**
-         * Shows the animated welcome message in an empty chat.
-         */
         function showInitialWelcomeMessage() {
-            const messagesContainer = document.getElementById('messages-container');
             const user = JSON.parse(localStorage.getItem('user') || '{}');
-            const username = user.username || 'Guest';
-
-            messagesContainer.innerHTML = `
-                <div id="initial-welcome" class="initial-welcome-container">
-                    <div class="initial-welcome-emoji">👏</div>
-                    <h2 class="initial-welcome-headline">Hello ${username}, I’m Kynay Assistant.</h2>
-                    <p class="initial-welcome-subtext">I’m here to help you with any questions or tasks you may have.</p>
-                </div>
-            `;
+            document.getElementById('messages-container').innerHTML = `<div id="initial-welcome" class="initial-welcome-container"><div class="initial-welcome-emoji">👏</div><h2 class="initial-welcome-headline">Hello ${user.username || 'Guest'}, I’m Kynay Assistant.</h2><p class="initial-welcome-subtext">I’m here to help you with any questions or tasks you may have.</p></div>`;
         }
 
-        /**
-         * Appends a single message to the chat UI.
-         */
         function addMessageToUI(message, shouldScroll = true) {
             const messagesContainer = document.getElementById('messages-container');
             const initialWelcome = document.getElementById('initial-welcome');
-            if (initialWelcome) {
-                messagesContainer.innerHTML = '';
-            }
+            if (initialWelcome) initialWelcome.remove();
             
             const div = document.createElement('div');
             const isUser = message.role === 'user';
-            
-            // [MODIFIED] Add items-start for AI message row for proper vertical alignment
             div.className = `flex ${isUser ? 'justify-end' : 'justify-start items-start'} mb-4`;
             
             if (isUser) {
-                div.innerHTML = `
-                    <div class="max-w-prose rounded-xl p-4 chat-bubble-user slide-in-right">
-                        <p class="text-sm whitespace-pre-wrap">${message.content}</p>
-                        <p class="text-xs opacity-70 mt-2 text-right">${new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                    </div>`;
-            } else { // [MODIFIED] AI message structure for better formatting
-                // Sanitize and format content for multiple paragraphs
-                const formattedContent = message.content
-                    .split('\n')
-                    .filter(p => p.trim() !== '')
-                    .map(p => `<p>${p.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`)
-                    .join('');
-
-                div.innerHTML = `
-                    <!-- Logo AI -->
-                    <img src="https://files.catbox.moe/ekxl3e.png" 
-                         alt="AI Logo" 
-                         class="w-6 h-6 object-contain mr-3 flex-shrink-0 mt-1">
-
-                    <!-- Konten AI Bubble -->
-                    <div class="chat-bubble-ai slide-in-left">
-                        ${formattedContent}
-                        <div class="timestamp">
-                            ${new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                    </div>`;
+                div.innerHTML = `<div class="max-w-prose rounded-xl p-4 chat-bubble-user slide-in-right"><p class="text-sm whitespace-pre-wrap">${message.content}</p><p class="text-xs opacity-70 mt-2 text-right">${new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p></div>`;
+            } else {
+                const formattedContent = message.content.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`).join('');
+                div.innerHTML = `<img src="https://files.catbox.moe/ekxl3e.png" alt="AI Logo" class="w-6 h-6 object-contain mr-3 flex-shrink-0 mt-1"><div class="chat-bubble-ai slide-in-left">${formattedContent}<div class="timestamp">${new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div></div>`;
             }
-
             messagesContainer.appendChild(div);
-            if (shouldScroll) {
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            }
+            if (shouldScroll) messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
-        /**
-         * Resets the chat area to its initial state (welcome message).
-         */
+        
         function resetChatUI() {
-            const messagesContainer = document.getElementById('messages-container');
             currentSessionId = null;
             document.getElementById('message-input').disabled = true;
             document.getElementById('send-btn').disabled = true;
             document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
-
-            const user = JSON.parse(localStorage.getItem('user') || '{}');
-            const username = user.username || 'Guest';
-            messagesContainer.innerHTML = `
-                <div class="flex items-center justify-center h-full p-4" data-aos="zoom-in">
-                    <div class="welcome-card text-center bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg max-w-lg">
-                        <img src="https://img.icons8.com/color/96/000000/bot.png" alt="Chatbot Icon" class="mx-auto mb-4"/>
-                        <h2 class="text-3xl font-bold text-primary mb-2">Welcome, ${username}!</h2>
-                        <p class="text-gray-600 dark:text-gray-300">
-                            Halo ${username}, selamat datang di Kynay Assistant! Assisten cerdas yang dapat melayani anda👏
-                        </p>
-                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-6">
-                            Start a new conversation by clicking "New Chat" on the sidebar.
-                        </p>
-                    </div>
-                </div>`;
+            showInitialWelcomeMessage();
         }
         
-        // --- EVENT HANDLERS FOR CHAT ACTIONS ---
-
         function handleRenameClick(sessionId, currentTitle) {
             const modal = document.getElementById('rename-chat-modal');
             const titleInput = document.getElementById('chat-title');
-            
             titleInput.value = currentTitle;
             modal.dataset.sessionId = sessionId;
-
             modal.classList.remove('hidden');
-            gsap.fromTo(modal, { opacity: 0 }, { opacity: 1, duration: 0.3 });
-            gsap.fromTo(modal.querySelector('div'), { scale: 0.9 }, { scale: 1, duration: 0.3, ease: 'back.out(1.7)' });
+            gsap.to(modal, { opacity: 1, duration: 0.3 });
+            gsap.to(modal.querySelector('div'), { scale: 1, duration: 0.3, ease: 'back.out(1.7)' });
         }
         
         async function handleRenameSubmit(e) {
             e.preventDefault();
             const modal = document.getElementById('rename-chat-modal');
-            const sessionId = modal.dataset.sessionId;
             const newTitle = document.getElementById('chat-title').value.trim();
-
             if (!newTitle) return;
-
             const token = localStorage.getItem('token');
             try {
-                const response = await fetch(`${API_BASE_URL}/api/session/${sessionId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/session/${modal.dataset.sessionId}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ title: newTitle })
@@ -847,122 +828,105 @@
                 if (data.ok) {
                     renderChatList(data.sessions);
                     hideRenameChatModal();
+                    showToast('success', 'Chat renamed successfully!');
+                } else {
+                    showToast('error', 'Failed to rename chat.');
                 }
-            } catch (error) {
-                console.error("Rename failed:", error);
+            } catch (error) { 
+                console.error("Rename failed:", error); 
+                showToast('error', 'An error occurred.');
             }
         }
         
         function hideRenameChatModal() {
             const modal = document.getElementById('rename-chat-modal');
+            gsap.to(modal.querySelector('div'), { scale: 0.95, duration: 0.2, ease: 'power2.in' });
             gsap.to(modal, { opacity: 0, duration: 0.2, onComplete: () => modal.classList.add('hidden') });
         }
         
         function handleDeleteClick(sessionId) {
-            if (confirm('Are you sure you want to delete this chat?')) {
-                deleteSession(sessionId);
-            }
+            const modal = document.getElementById('delete-chat-modal');
+            modal.dataset.sessionId = sessionId;
+            modal.classList.remove('hidden');
+            gsap.to(modal, { opacity: 1, duration: 0.3 });
+            gsap.to(modal.querySelector('div'), { scale: 1, duration: 0.3, ease: 'back.out(1.7)' });
+        }
+        
+        function hideDeleteChatModal() {
+            const modal = document.getElementById('delete-chat-modal');
+            gsap.to(modal.querySelector('div'), { scale: 0.95, duration: 0.2, ease: 'power2.in' });
+            gsap.to(modal, { opacity: 0, duration: 0.2, onComplete: () => modal.classList.add('hidden') });
         }
         
         async function deleteSession(sessionId) {
             const token = localStorage.getItem('token');
             try {
-                const response = await fetch(`${API_BASE_URL}/api/session/${sessionId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await fetch(`${API_BASE_URL}/api/session/${sessionId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
                 const data = await response.json();
                 if (data.ok) {
+                    showToast('success', 'Chat deleted successfully.');
                     const deletedElement = document.querySelector(`.chat-item[data-session-id="${sessionId}"]`);
                     if(deletedElement) {
                         gsap.to(deletedElement, { opacity: 0, x: -20, duration: 0.3, onComplete: () => {
                            renderChatList(data.sessions); 
-                           if (currentSessionId === sessionId) {
-                                initializeDashboardOnReload();
-                           }
+                           if (currentSessionId === sessionId) initializeDashboardOnReload();
                         }});
                     }
+                } else {
+                    showToast('error', 'Failed to delete chat.');
                 }
-            } catch (error) {
-                console.error("Delete failed:", error);
+            } catch (error) { 
+                console.error("Delete failed:", error); 
+                showToast('error', 'An error occurred.');
             }
         }
 
         async function autoRenameSession(sessionId, newTitle) {
             const token = localStorage.getItem('token');
+            const truncatedTitle = newTitle.substring(0, 50);
             try {
-                const response = await fetch(`${API_BASE_URL}/api/session/${sessionId}`, {
+                await fetch(`${API_BASE_URL}/api/session/${sessionId}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title: newTitle })
+                    body: JSON.stringify({ title: truncatedTitle })
                 });
-                const data = await response.json();
-                
-                if (data.ok) {
-                    const chatItem = document.querySelector(`.chat-item[data-session-id="${sessionId}"]`);
-                    if (chatItem) {
-                        chatItem.querySelector('h3').textContent = newTitle;
-                        chatItem.setAttribute('data-title', newTitle);
-                    }
-                }
-            } catch (error) {
-                console.error("Auto-rename failed:", error);
-            }
+                const chatItem = document.querySelector(`.chat-item[data-session-id="${sessionId}"] h3`);
+                if (chatItem) chatItem.textContent = truncatedTitle;
+            } catch (error) { console.error("Auto-rename failed:", error); }
         }
 
-
-        // --- SPEECH RECOGNITION ---
-        
         function setupSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                recognition = new SpeechRecognition();
-                recognition.continuous = false;
-                recognition.lang = 'id-ID';
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-
-                recognition.onresult = (event) => {
-                    const speechResult = event.results[0][0].transcript;
-                    document.getElementById('message-input').value += speechResult;
-                    stopRecognition();
-                };
-
-                recognition.onspeechend = stopRecognition;
-                recognition.onerror = (event) => {
-                    console.error('Speech recognition error:', event.error);
-                    stopRecognition();
-                    alert('Error in speech recognition: ' + event.error);
-                };
-            } else {
-                console.warn('Speech Recognition not supported in this browser.');
-                document.getElementById('mic-btn').style.display = 'none';
-            }
+            if (!SpeechRecognition) return document.getElementById('mic-btn').style.display = 'none';
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'id-ID';
+            recognition.interimResults = false;
+            recognition.onresult = e => document.getElementById('message-input').value += e.results[0][0].transcript;
+            recognition.onspeechend = stopRecognition;
+            recognition.onerror = e => console.error('Speech recognition error:', e.error);
         }
         
         function handleMicClick() {
             if (!recognition) return;
-
             const micIcon = document.getElementById('mic-btn').querySelector('i');
             if (micIcon.classList.contains('fa-microphone-slash')) {
                 stopRecognition();
             } else {
                 recognition.start();
-                micIcon.classList.remove('fa-microphone');
-                micIcon.classList.add('fa-microphone-slash', 'text-red-500', 'animate-pulse');
+                micIcon.classList.replace('fa-microphone', 'fa-microphone-slash');
+                micIcon.classList.add('text-red-500', 'animate-pulse');
             }
         }
 
         function stopRecognition() {
-             if (recognition) recognition.stop();
+             if (!recognition) return;
+             recognition.stop();
              const micIcon = document.getElementById('mic-btn').querySelector('i');
-             micIcon.classList.remove('fa-microphone-slash', 'text-red-500', 'animate-pulse');
-             micIcon.classList.add('fa-microphone');
+             micIcon.classList.replace('fa-microphone-slash', 'fa-microphone');
+             micIcon.classList.remove('text-red-500', 'animate-pulse');
         }
 
-
-        // --- UTILS & HELPERS ---
-        
         function setupEventListeners() {
             document.getElementById('toggle-auth-mode').addEventListener('click', toggleAuthMode);
             document.getElementById('auth-form').addEventListener('submit', handleAuth);
@@ -973,41 +937,37 @@
             document.getElementById('search-chats-input').addEventListener('input', searchChats);
             document.getElementById('message-form').addEventListener('submit', sendMessage);
             document.getElementById('mic-btn').addEventListener('click', handleMicClick);
-            
             document.getElementById('rename-chat-form').addEventListener('submit', handleRenameSubmit);
             document.getElementById('cancel-rename-chat').addEventListener('click', hideRenameChatModal);
             
-            document.getElementById('create-image-btn').addEventListener('click', () => console.log('Create image clicked'));
-            document.getElementById('edit-image-btn').addEventListener('click', () => console.log('Edit image clicked'));
-        }
-
-        function handleLogout() {
-            gsap.to('#dashboard-section', { opacity: 0, duration: 0.5, onComplete: () => {
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                currentSessionId = null;
-                document.getElementById('chat-sessions-list').innerHTML = '';
-                document.getElementById('messages-container').innerHTML = '';
-                showAuthSection();
-            }});
+            document.getElementById('cancel-delete-chat').addEventListener('click', hideDeleteChatModal);
+            document.getElementById('confirm-delete-chat').addEventListener('click', () => {
+                const modal = document.getElementById('delete-chat-modal');
+                const sessionId = modal.dataset.sessionId;
+                if (sessionId) {
+                    deleteSession(sessionId);
+                }
+                hideDeleteChatModal();
+            });
         }
 
         function toggleAuthMode() {
-            isRegistering = !isRegistering;
-            document.getElementById('auth-button').textContent = isRegistering ? 'Register' : 'Sign In';
-            document.getElementById('toggle-auth-mode').textContent = isRegistering ? 'Already have an account? Sign in' : 'Need an account? Register';
-        }
-
-        function showAuthSection() {
-            document.getElementById('auth-section').classList.remove('hidden');
-            document.getElementById('dashboard-section').classList.add('hidden');
-            gsap.to('#auth-section', { opacity: 1, duration: 0.5 });
-        }
-
-        function showDashboard() {
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('dashboard-section').classList.remove('hidden');
-            gsap.to('#dashboard-section', { opacity: 1, duration: 0.5 });
+            const authContent = document.getElementById('auth-content');
+            
+            gsap.to(authContent, {
+                opacity: 0,
+                y: -20,
+                duration: 0.2,
+                ease: 'power2.in',
+                onComplete: () => {
+                    isRegistering = !isRegistering;
+                    document.querySelector('#auth-button .button-text').textContent = isRegistering ? 'Register' : 'Sign In';
+                    document.getElementById('toggle-auth-mode').textContent = isRegistering ? 'Already have an account? Sign in' : 'Need an account? Register';
+                    document.getElementById('auth-form').reset();
+                    clearInputErrors();
+                    gsap.fromTo(authContent, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' });
+                }
+            });
         }
         
         function toggleSidebar() {
@@ -1026,19 +986,8 @@
         function searchChats() {
             const searchTerm = document.getElementById('search-chats-input').value.toLowerCase();
             document.querySelectorAll('.chat-item').forEach(item => {
-                const title = item.dataset.title.toLowerCase();
-                if (title.includes(searchTerm)) {
-                    item.style.display = '';
-                    gsap.fromTo(item, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.3 });
-                } else {
-                    item.style.display = 'none';
-                }
+                item.style.display = item.dataset.title.toLowerCase().includes(searchTerm) ? '' : 'none';
             });
-        }
-        
-        function showError(element, message) {
-            element.textContent = message;
-            element.classList.remove('hidden');
         }
 
         function handleResize() {
@@ -1046,36 +995,29 @@
                 document.getElementById('sidebar').classList.remove('-translate-x-full');
                 document.getElementById('sidebar-overlay').classList.add('hidden');
                 isSidebarOpen = true;
-            } else if (isSidebarOpen) {
-                // Keep it open if it was already open on mobile
             } else {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
-                document.getElementById('sidebar-overlay').classList.add('hidden');
-                isSidebarOpen = false;
+                if(isSidebarOpen) {
+                    document.getElementById('sidebar').classList.add('-translate-x-full');
+                    isSidebarOpen = false;
+                }
             }
         }
 
         function initTheme() {
             const savedTheme = localStorage.getItem('theme') || 'dark';
-            const themeToggle = document.getElementById('theme-toggle');
-            const themeIconDark = document.getElementById('theme-icon-dark');
-            const themeIconLight = document.getElementById('theme-icon-light');
-
             const applyTheme = (theme) => {
                 if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
-                    themeIconLight.classList.remove('hidden');
-                    themeIconDark.classList.add('hidden');
+                    document.getElementById('theme-icon-light').classList.add('hidden');
+                    document.getElementById('theme-icon-dark').classList.remove('hidden');
                 } else {
                     document.documentElement.classList.remove('dark');
-                    themeIconDark.classList.remove('hidden');
-                    themeIconLight.classList.add('hidden');
+                    document.getElementById('theme-icon-dark').classList.add('hidden');
+                    document.getElementById('theme-icon-light').classList.remove('hidden');
                 }
             };
-            
             applyTheme(savedTheme);
-            
-            themeToggle.addEventListener('click', () => {
+            document.getElementById('theme-toggle').addEventListener('click', () => {
                 const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
                 localStorage.setItem('theme', newTheme);
                 applyTheme(newTheme);
@@ -1087,16 +1029,11 @@
                 const target = e.target.closest('.ripple');
                 if (target) {
                     const rect = target.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
                     const ripple = document.createElement('span');
-                    ripple.classList.add('ripple-effect');
-                    ripple.style.left = `${x}px`;
-                    ripple.style.top = `${y}px`;
-                    
+                    ripple.className = 'ripple-effect';
+                    ripple.style.left = `${e.clientX - rect.left}px`;
+                    ripple.style.top = `${e.clientY - rect.top}px`;
                     target.appendChild(ripple);
-                    
                     setTimeout(() => ripple.remove(), 600);
                 }
             });
