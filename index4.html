@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kynay Assistant</title>
+   
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+   
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #18181b;
+            color: #e5e5e5;
+        }
+        
+        .chat-bubble-user {
+            background-color: #2a2a2a;
+            color: #e5e5e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            border-radius: 1rem;
+        }
+        
+        .chat-bubble-ai {
+            background-color: #262626;
+            color: #e5e5e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: 1px solid #333333;
+            padding: 1rem;
+            border-radius: 1rem;
+            width: fit-content;
+            max-width: 90%;
+        }
+
+        .chat-bubble-ai p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 65ch;
+        }
+
+        .chat-bubble-ai p:last-child { margin-bottom: 0; }
+        .chat-bubble-ai .timestamp { display: block; text-align: right; font-size: 0.75rem; color: #a1a1aa; margin-top: 0.5rem; }
+        
+        .ai-response p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-width: 65ch;
+            color: #e5e5e5;
+        }
+        .ai-response p:last-child {
+            margin-bottom: 0;
+        }
+        .ai-response .timestamp {
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            color: #a1a1aa;
+            margin-top: 0.5rem;
+        }
+
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        .slide-in-right { animation: slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .slide-in-left { animation: slideInLeft 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideInRight { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideInLeft { from { transform: translateX(-30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
+        .shine-effect { position: relative; overflow: hidden; }
+        .shine-effect::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 20px; height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            animation: subtle-shine 6s infinite linear;
+            animation-delay: var(--shine-delay, 0s);
+        }
+        @keyframes subtle-shine { from { left: -50%; } to { left: 120%; } }
+        
+        .dot-animation .dot { animation: blink 1.4s infinite both; }
+        .dot-animation .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot-animation .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0%, 80%, 100% { opacity: 0; } 40% { opacity: 1; } }
+        
+        .chat-item { transition: background-color 0.3s ease; border-left: 3px solid transparent; position: relative; }
+        .chat-item:hover { background-color: #333333; }
+        .chat-item.active { background-color: #333333; border-left-color: #a1a1aa; }
+        
+        .chat-action-btn { transition: all 0.2s ease-in-out; }
+        .chat-action-btn:hover { transform: scale(1.15); color: #f5f5f5; }
+        .chat-action-btn.delete-btn:hover { color: var(--danger-color); }
+
+        .premium-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .premium-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .premium-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        .premium-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        .ripple { position: relative; overflow: hidden; }
+        .ripple-effect { position: absolute; border-radius: 50%; background-color: rgba(255, 255, 255, 0.2); transform: scale(0); animation: ripple-animation 0.6s linear; }
+        @keyframes ripple-animation { to { transform: scale(4); opacity: 0; } }
+
+        @keyframes shake {
+          10%, 90% { transform: translate3d(-1px, 0, 0); }
+          20%, 80% { transform: translate3d(2px, 0, 0); }
+          30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+          40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .shake-error { animation: shake 0.82s cubic-bezier(.36,.07,.19,.97) both; }
+
+        .footer-shine::after {
+            content: ''; position: absolute; top: 0; left: -150px; width: 100px; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transform: skewX(-25deg); animation: footer-shine-anim 8s linear infinite;
+        }
+        @keyframes footer-shine-anim { 0% { left: -150px; } 100% { left: 120%; } }
+
+        .wave-emoji {
+            display: inline-block;
+            animation: wave-animation 2.5s infinite;
+            transform-origin: 70% 70%;
+        }
+        @keyframes wave-animation {
+            0% { transform: rotate(0deg); }
+            10% { transform: rotate(14deg); }
+            20% { transform: rotate(-8deg); }
+            30% { transform: rotate(14deg); }
+            40% { transform: rotate(-4deg); }
+            50% { transform: rotate(10deg); }
+            60% { transform: rotate(0deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .category-button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .category-button:before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+        .category-button:hover:before {
+            width: 200px;
+            height: 200px;
+        }
+
+        /* --- Modern Button Styles Start --- */
+        .btn-clean, .btn-chat {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: color 0.4s ease-in-out, transform 0.2s ease-in-out;
+            -webkit-tap-highlight-color: transparent;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+        }
+
+        /* Target children to ensure they are above the pseudo-element */
+        .btn-clean > span, .btn-chat > span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-clean::before, .btn-chat::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            transition: left 0.4s ease-in-out;
+            z-index: 0;
+        }
+
+        .btn-clean:active, .btn-chat:active {
+            transform: scale(0.96);
+        }
+
+        .btn-clean:hover::before, .btn-chat:hover::before {
+            left: 0;
+        }
+
+        /* Style for Login/Register/Logout Button */
+        .btn-clean {
+            background-color: #18181b;
+            color: #ffffff;
+            border: 1px solid #333333;
+        }
+        .btn-clean::before {
+            background-color: #ffffff;
+        }
+        .btn-clean:hover {
+            color: #000000;
+        }
+
+        /* Style for New Chat Button */
+        .btn-chat {
+            background-color: #ffffff;
+            color: #000000;
+            border: 1px solid #d4d4d8;
+        }
+        .btn-chat::before {
+            background-color: #18181b;
+        }
+        .btn-chat:hover {
+            color: #ffffff;
+        }
+        /* --- Modern Button Styles End --- */
+
+    </style>
+    <script>
+        document.documentElement.classList.add('dark');
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['Menlo', 'Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        danger: '#ef4444',
+                        'danger-hover': '#dc2626',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#18181b] min-h-screen">
+    
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] space-y-2 w-full max-w-xs"></div>
+
+    <div id="auth-section" class="min-h-screen flex items-center justify-center px-4 py-12">
+        <div class="max-w-md w-full">
+            <div id="auth-card" class="bg-[#1f1f1f] p-8 md:p-10 rounded-xl shadow-2xl overflow-hidden">
+                <div id="auth-content">
+                    <div class="flex justify-center mb-4">
+                      <img src="https://files.catbox.moe/qgg4mt.png" alt="Kynay Assistant Logo" class="w-auto h-16 object-contain mx-auto">
+                    </div>
+                    <p class="mt-2 text-center text-sm text-[#a1a1aa]">Sign in or create an account</p>
+                    <form class="mt-8 space-y-4" id="auth-form" novalidate>
+                        <input type="hidden" id="captcha" name="captcha" value="bypass-captcha">
+                        <div>
+                            <input id="username" name="username" type="text" class="appearance-none relative block w-full px-3 py-3 border border-[#333333] placeholder-[#a1a1aa] text-[#e5e5e5] bg-[#262626] rounded-md focus:outline-none focus:ring-1 focus:ring-[#a1a1aa] focus:border-[#a1a1aa] sm:text-sm transition-colors duration-300" placeholder="Username">
+                            <div id="username-error" class="text-red-500 text-xs mt-1 h-4 transition-all"></div>
+                        </div>
+                        <div>
+                            <input id="password" name="password" type="password" class="appearance-none relative block w-full px-3 py-3 border border-[#333333] placeholder-[#a1a1aa] text-[#e5e5e5] bg-[#262626] rounded-md focus:outline-none focus:ring-1 focus:ring-[#a1a1aa] focus:border-[#a1a1aa] sm:text-sm transition-colors duration-300" placeholder="Password">
+                            <div id="password-error" class="text-red-500 text-xs mt-1 h-4 transition-all"></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-gray-400 bg-gray-700 border-gray-600 rounded focus:ring-gray-600">
+                                <label for="remember-me" class="ml-2 block text-sm text-[#e5e5e5]">Remember me</label>
+                            </div>
+                        </div>
+                        <div>
+                            <!-- ### MODIFIED BUTTON ### -->
+                            <button type="submit" id="auth-button" class="btn-clean w-full flex justify-center items-center text-sm font-medium h-12">
+                                <span>
+                                    <span class="button-text">Sign In</span>
+                                    <span class="button-loader hidden"><i class="fas fa-spinner fa-spin text-lg"></i></span>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="text-center">
+                            <button type="button" id="toggle-auth-mode" class="mt-4 text-sm text-[#a1a1aa] hover:text-[#f5f5f5] transition-colors duration-300">
+                                Need to create an account? Register now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard-section" class="hidden h-screen flex flex-col bg-[#18181b]">
+        <nav class="bg-[#18181b] shadow-md py-3 px-6 flex justify-between items-center z-20">
+            <div class="flex items-center">
+                <button id="sidebar-toggle" class="text-[#a1a1aa] focus:outline-none md:hidden ripple p-2 rounded-full">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+            <div class="flex-1 text-center">
+                <h1 class="text-lg font-semibold text-[#f5f5f5]">Kynay Assistant</h1>
+            </div>
+            <div class="w-8 md:w-0"></div>
+        </nav>
+
+        <div class="flex flex-1 overflow-hidden">
+            <aside id="sidebar" class="w-72 bg-[#18181b] border-r border-[#27272a] flex flex-col transform transition-transform duration-300 ease-in-out md:translate-x-0 -translate-x-full fixed md:relative inset-y-0 left-0 z-40 md:z-auto">
+                <div class="p-4">
+                    <div class="flex justify-center p-4 shine-effect rounded-lg shadow-md bg-[#262626]" style="--shine-delay: 1s;">
+                      <img src="https://files.catbox.moe/qgg4mt.png" alt="Kynay Assistant Logo" class="w-full h-auto object-contain">
+                    </div>
+                </div>
+                <div class="px-4">
+                    <!-- ### MODIFIED BUTTON ### -->
+                    <button id="new-chat-btn" class="btn-chat w-full flex items-center justify-center font-semibold">
+                       <span><i class="fas fa-plus mr-2"></i> New Chat</span>
+                    </button>
+                </div>
+                <div class="mt-4 px-4">
+                  <div class="relative">
+                    <input type="text" id="search-chats-input" placeholder="Search chats..." class="w-full pl-10 pr-4 py-2 rounded-lg bg-[#262626] text-[#e5e5e5] placeholder-[#a1a1aa] focus:outline-none focus:ring-2 focus:ring-[#a1a1aa] border border-transparent focus:border-[#a1a1aa]">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-[#a1a1aa]"><i class="fas fa-search"></i></span>
+                  </div>
+                </div>
+                <div id="chat-sessions-list" class="flex-1 mt-4 overflow-y-auto p-2 premium-scrollbar"></div>
+                <div class="p-4 border-t border-[#27272a]">
+                     <div class="flex items-center">
+                        <!-- ### MODIFIED BUTTON ### -->
+                        <button id="logout-btn" class="btn-clean w-full flex items-center justify-center text-sm">
+                           <span><i class="fas fa-sign-out-alt mr-2"></i>Logout</span>
+                        </button>
+                     </div>
+                </div>
+            </aside>
+            <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden hidden"></div>
+            
+            <main class="flex-1 flex flex-col overflow-hidden bg-[#18181b]">
+                <div class="flex-1 overflow-y-auto p-4 space-y-4 premium-scrollbar" id="messages-container">
+                    <!-- Welcome Message or Chat Bubbles appear here -->
+                </div>
+                <!-- Chat Input Area -->
+                <div class="border-t border-[#27272a] p-4 bg-[#18181b]">
+                    <div class="max-w-4xl mx-auto">
+                        <!-- FRAME CONTAINER -->
+                        <form id="message-form" class="flex items-end bg-[#262626] border border-[#333333] rounded-lg p-2 space-x-2">
+                            
+                            <!-- Attach File Button -->
+                            <button type="button" id="attach-file-btn" class="p-2 text-[#a1a1aa] hover:text-[#f5f5f5] transition-colors duration-300 ripple flex-shrink-0">
+                                <i data-lucide="paperclip" class="w-5 h-5"></i>
+                            </button>
+                
+                            <!-- Multi-line Textarea Input -->
+                            <div class="flex-1">
+                                <textarea id="message-input" 
+                                    placeholder="What do you want to know?"
+                                    rows="1"
+                                    class="w-full px-3 py-2 bg-transparent text-[#f5f5f5] placeholder-[#a1a1aa] focus:outline-none resize-none overflow-y-auto"
+                                    style="max-height: 8rem;"
+                                    disabled></textarea>
+                            </div>
+                
+                            <!-- Mic Button -->
+                            <button type="button" id="mic-btn" class="p-2 text-[#a1a1aa] hover:text-[#f5f5f5] transition-colors duration-300 ripple flex-shrink-0">
+                                <i data-lucide="mic" class="w-5 h-5"></i>
+                            </button>
+                
+                            <!-- Send Button -->
+                            <button type="submit" id="send-btn" class="p-2 text-[#a1a1aa] hover:text-white transition-colors duration-300 ripple flex-shrink-0 hidden">
+                                <i data-lucide="send" class="w-5 h-5"></i>
+                            </button>
+                
+                        </form>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer id="main-footer" class="fixed bottom-0 left-0 w-full bg-[#18181b] text-[#a1a1aa] text-xs text-center py-1 z-50 footer-shine hidden">
+        © Kynay AI — Created by Farhan Kertadiwangsa
+    </footer>
+
+    <!-- Modals -->
+    <div id="rename-chat-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-[#262626] rounded-lg shadow-xl w-full max-w-md transform scale-95 transition-transform duration-300">
+            <div class="p-6">
+                <h3 class="text-lg font-medium text-[#f5f5f5] mb-4">Rename Chat</h3>
+                <form id="rename-chat-form">
+                    <div class="mb-4">
+                        <label for="chat-title" class="block text-sm font-medium text-[#a1a1aa] mb-1">Chat Title</label>
+                        <input type="text" id="chat-title" class="w-full px-3 py-2 border border-[#333333] rounded-md focus:outline-none focus:ring-1 focus:ring-[#a1a1aa] focus:border-[#a1a1aa] bg-[#2a2a2a] text-[#f5f5f5]" placeholder="Enter chat title">
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" id="cancel-rename-chat" class="px-4 py-2 text-sm font-medium text-[#f5f5f5] bg-[#333333] hover:bg-[#4d4d4d] rounded-md transition-colors duration-300 ripple">Cancel</button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-[#2a2a2a] hover:bg-[#333333] rounded-md transition-colors duration-300 ripple shine-effect">Rename</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div id="delete-chat-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-[#262626] rounded-xl shadow-xl w-full max-w-sm transform scale-95 transition-transform duration-300 p-6 text-center">
+            <div class="text-danger mb-4"><i class="fas fa-exclamation-triangle fa-3x"></i></div>
+            <h3 class="text-lg font-bold text-[#f5f5f5] mb-2">Delete Chat</h3>
+            <p class="text-sm text-[#a1a1aa] mb-6">Are you sure you want to permanently delete this chat? This action cannot be undone.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="cancel-delete-chat" class="px-6 py-2 text-sm font-medium text-[#f5f5f5] bg-[#333333] hover:bg-[#4d4d4d] rounded-md transition-colors duration-300 ripple">Cancel</button>
+                <button id="confirm-delete-chat" class="px-6 py-2 text-sm font-medium text-white bg-danger hover:bg-danger-hover rounded-md transition-colors duration-300 ripple shine-effect">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE_URL = 'http://yoztampan.xintzy.me:2009';
+        let currentSessionId = null;
+        let isRegistering = false;
+        let isSidebarOpen = window.innerWidth >= 768;
+        let recognition = null; 
+
+        // --- NEW FUNCTIONS FOR CODE FRAME ---
+        function copyCode(btn) {
+            const code = btn.closest('.relative').querySelector('pre code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('success', 'Kode berhasil disalin!');
+            }, () => {
+                showToast('error', 'Gagal menyalin kode.');
+            });
+        }
+
+        function downloadCode(btn) {
+            const code = btn.closest('.relative').querySelector('pre code').innerText;
+            let ext = 'txt';
+            const lower = code.toLowerCase().trim();
+
+            if (lower.startsWith('<!doctype') || lower.startsWith('<html')) ext = 'html';
+            else if (lower.includes('console.log') || lower.includes('function') || lower.includes('=>')) ext = 'js';
+            else if (lower.includes('import') && lower.includes('from')) ext = 'ts';
+            else if (lower.includes('def ') || lower.includes('print(')) ext = 'py';
+            else if (lower.includes('<?php')) ext = 'php';
+            else if (lower.includes('select ') || lower.includes('create table')) ext = 'sql';
+            else if (lower.includes('#include') || lower.includes('int main')) ext = 'c';
+            else if (lower.includes('class ') && lower.includes('public static void main')) ext = 'java';
+            else if (lower.includes('using system') || lower.includes('namespace')) ext = 'cs';
+            else if (lower.includes('fn main') || lower.includes('pub fn')) ext = 'rs';
+            else if (lower.includes('func main()') && lower.includes('package main')) ext = 'go';
+            else if (lower.includes('puts') || lower.includes('end')) ext = 'rb';
+            else if (lower.startsWith('{') || lower.startsWith('[')) ext = 'json';
+            else if (lower.includes(':') && !lower.includes(';')) ext = 'yaml';
+            else if (lower.includes('# ') || lower.includes('## ')) ext = 'md';
+            else if (lower.includes('pragma solidity')) ext = 'sol';
+            else if (lower.includes('sub ') || lower.includes('my $')) ext = 'pl';
+            else if (lower.includes('fn ') && lower.includes('->')) ext = 'hs';
+            else if (lower.includes('library(') || lower.includes('<-')) ext = 'r';
+            else if (lower.includes('function(') && lower.includes('end')) ext = 'lua';
+            else if (lower.includes('begin') && lower.includes('end.')) ext = 'pas';
+            else if (lower.includes('program ') || lower.includes('procedure')) ext = 'p';
+            else if (lower.includes('identification division')) ext = 'cob';
+            else if (lower.includes('program ') && lower.includes('implicit none')) ext = 'f90';
+
+            const blob = new Blob([code], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `kynay-ai.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        }
+        
+        function formatAIResponse(content) {
+            const codeBlockRegex = /```(\w*)\n([\s\S]+?)```/g;
+            let lastIndex = 0;
+            let htmlParts = [];
+            let match;
+
+            while ((match = codeBlockRegex.exec(content)) !== null) {
+                if (match.index > lastIndex) {
+                    const textPart = content.substring(lastIndex, match.index);
+                    htmlParts.push(textPart.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`).join(''));
+                }
+
+                const language = match[1] || '';
+                const code = match[2];
+                const sanitizedCode = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const langClass = language ? `language-${language}` : '';
+
+                const codeFrame = `
+                <div class="relative bg-[#1f1f1f] border border-[#333333] rounded-xl overflow-hidden shadow-lg my-4">
+                  <div class="flex justify-between items-center px-4 py-2 bg-[#262626] border-b border-[#333333]">
+                    <span class="text-sm font-semibold text-[#f5f5f5]">Kynay AI Code</span>
+                    <div class="flex space-x-2">
+                      <button onclick="copyCode(this)" class="text-[#a1a1aa] hover:text-white transition-colors p-2 rounded-md" title="Salin kode">
+                        <i class="fas fa-copy"></i>
+                      </button>
+                      <button onclick="downloadCode(this)" class="text-[#a1a1aa] hover:text-white transition-colors p-2 rounded-md" title="Download kode">
+                        <i class="fas fa-download"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <pre class="p-4 overflow-x-auto text-sm text-[#e5e5e5] premium-scrollbar font-mono"><code class="${langClass}">${sanitizedCode.trim()}</code></pre>
+                </div>`;
+                htmlParts.push(codeFrame);
+                lastIndex = codeBlockRegex.lastIndex;
+            }
+
+            if (lastIndex < content.length) {
+                const remainingText = content.substring(lastIndex);
+                htmlParts.push(remainingText.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`).join(''));
+            }
+
+            if (htmlParts.length === 0) {
+                return content.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`).join('');
+            }
+            
+            return htmlParts.join('');
+        }
+        // --- END OF NEW FUNCTIONS ---
+
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            setupEventListeners();
+            window.addEventListener('resize', handleResize);
+            setupRippleEffects();
+            setupSpeechRecognition();
+            lucide.createIcons();
+        });
+        
+        function showToast(type = 'info', message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            let iconClass, iconColor;
+            switch (type) {
+                case 'success': iconClass = 'fa-check-circle'; iconColor = 'text-[#22c55e]'; break;
+                case 'error': iconClass = 'fa-times-circle'; iconColor = 'text-[#ef4444]'; break;
+                default: iconClass = 'fa-info-circle'; iconColor = 'text-[#3b82f6]';
+            }
+            toast.className = `flex items-center w-full max-w-xs p-4 text-[#e5e5e5] bg-[#262626] rounded-lg shadow-lg`;
+            toast.innerHTML = `<div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 ${iconColor} rounded-lg"><i class="fas ${iconClass}"></i></div><div class="ml-3 text-sm font-normal">${message}</div><button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-[#262626] text-[#a1a1aa] hover:text-[#f5f5f5] rounded-lg focus:ring-2 focus:ring-gray-500 p-1.5 hover:bg-[#333333] inline-flex items-center justify-center h-8 w-8"><span class="sr-only">Close</span><i class="fas fa-times"></i></button>`;
+            container.appendChild(toast);
+            gsap.from(toast, { opacity: 0, x: 50, duration: 0.5, ease: 'back.out(1.7)' });
+            const removeToast = () => gsap.to(toast, { opacity: 0, x: 50, duration: 0.3, onComplete: () => toast.remove() });
+            toast.querySelector('button').addEventListener('click', removeToast);
+            setTimeout(removeToast, 5000);
+        }
+
+        function setButtonLoading(button, isLoading) {
+            const buttonText = button.querySelector('.button-text');
+            const buttonLoader = button.querySelector('.button-loader');
+            if (isLoading) {
+                button.disabled = true;
+                buttonText.classList.add('hidden');
+                buttonLoader.classList.remove('hidden');
+            } else {
+                button.disabled = false;
+                buttonText.classList.remove('hidden');
+                buttonLoader.classList.add('hidden');
+            }
+        }
+
+        function showInputError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const errorDiv = document.getElementById(`${inputId}-error`);
+            input.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+            input.classList.remove('focus:border-[#a1a1aa]', 'focus:ring-[#a1a1aa]');
+            errorDiv.textContent = message;
+            gsap.from(errorDiv, { y: -10, opacity: 0, duration: 0.3 });
+        }
+
+        function clearInputErrors() {
+            ['username', 'password'].forEach(inputId => {
+                const input = document.getElementById(inputId);
+                const errorDiv = document.getElementById(`${inputId}-error`);
+                if (input) {
+                    input.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+                    input.classList.add('focus:border-[#a1a1aa]', 'focus:ring-[#a1a1aa]');
+                }
+                if (errorDiv) errorDiv.textContent = '';
+            });
+        }
+      
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                showDashboard(false); 
+                initializeDashboardOnReload(); 
+            } else {
+                showAuthSection(false); 
+            }
+        }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            clearInputErrors();
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const authButton = document.getElementById('auth-button');
+            const authCard = document.getElementById('auth-card');
+            let isValid = true;
+            if (usernameInput.value.trim() === '') { showInputError('username', 'Username cannot be empty.'); isValid = false; }
+            if (passwordInput.value.trim() === '') { showInputError('password', 'Password cannot be empty.'); isValid = false; }
+            if (!isValid) return;
+            setButtonLoading(authButton, true);
+            try {
+                const endpoint = isRegistering ? '/auth/register' : '/auth/login';
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameInput.value, password: passwordInput.value, captcha: 'bypass-captcha' })
+                });
+                const data = await response.json();
+                if (data.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    gsap.to('#auth-section', { opacity: 0, y: -50, duration: 0.5, ease: 'power2.in', onComplete: () => { showDashboard(true); initializeDashboardOnLogin(); }});
+                } else {
+                    showToast('error', data.error || 'Authentication failed');
+                    authCard.classList.add('shake-error');
+                    setTimeout(() => authCard.classList.remove('shake-error'), 820);
+                }
+            } catch (error) { showToast('error', 'Network error. Please try again.'); } 
+            finally { setButtonLoading(authButton, false); }
+        }
+        
+        function handleLogout() {
+            gsap.to('#dashboard-section', { opacity: 0, y: -50, duration: 0.5, ease: 'power2.in', onComplete: () => {
+                localStorage.removeItem('token'); localStorage.removeItem('user');
+                currentSessionId = null;
+                document.getElementById('chat-sessions-list').innerHTML = '';
+                document.getElementById('messages-container').innerHTML = '';
+                showAuthSection(true);
+            }});
+        }
+        
+        function showAuthSection(animated = true) {
+            document.getElementById('dashboard-section').classList.add('hidden');
+            document.getElementById('main-footer').classList.add('hidden');
+            const authSection = document.getElementById('auth-section');
+            authSection.classList.remove('hidden');
+            document.getElementById('auth-form').reset();
+            clearInputErrors();
+            if (animated) { gsap.fromTo(authSection, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }); } 
+            else { gsap.set(authSection, { opacity: 1, y: 0 }); }
+        }
+        
+        function showDashboard(animated = true) {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('main-footer').classList.remove('hidden');
+            const dashboardSection = document.getElementById('dashboard-section');
+            dashboardSection.classList.remove('hidden');
+            if (animated) { gsap.fromTo(dashboardSection, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }); } 
+            else { gsap.set(dashboardSection, { opacity: 1, y: 0 }); }
+        }
+
+        function updateChatButtonState() {
+            const messageInput = document.getElementById('message-input');
+            const micBtn = document.getElementById('mic-btn');
+            const sendBtn = document.getElementById('send-btn');
+            const hasText = messageInput.value.trim().length > 0;
+            if (hasText) {
+                if (!micBtn.classList.contains('hidden')) {
+                     gsap.to(micBtn, { scale: 0, opacity: 0, duration: 0.2, ease: 'power2.in', onComplete: () => micBtn.classList.add('hidden') });
+                     sendBtn.classList.remove('hidden'); sendBtn.disabled = false;
+                     gsap.fromTo(sendBtn, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: 'power2.out', delay: 0.1 });
+                }
+            } else {
+                if (!sendBtn.classList.contains('hidden')) {
+                    gsap.to(sendBtn, { scale: 0, opacity: 0, duration: 0.2, ease: 'power2.in', onComplete: () => { sendBtn.classList.add('hidden'); sendBtn.disabled = true; }});
+                    micBtn.classList.remove('hidden');
+                    gsap.fromTo(micBtn, { scale: 0, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.2, ease: 'power2.out', delay: 0.1 });
+                }
+            }
+        }
+
+        function initializeDashboardOnLogin() {
+            createNewSession(false).then(newSession => {
+                if (newSession) {
+                    currentSessionId = newSession.id;
+                    fetchAllSessions().then(renderChatList);
+                    loadChatSession(currentSessionId);
+                } else { resetChatUI(); }
+            }).catch(error => { console.error("Initialization failed:", error); resetChatUI(); });
+        }
+
+        function initializeDashboardOnReload() {
+            fetchAllSessions().then(sessions => {
+                renderChatList(sessions);
+                if (sessions && sessions.length > 0) {
+                    const lastSession = sessions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+                    currentSessionId = lastSession.id;
+                    loadChatSession(currentSessionId);
+                } else { initializeDashboardOnLogin(); }
+            }).catch(error => { console.error("Reload initialization failed:", error); resetChatUI(); });
+        }
+
+        async function handleNewChatClick() {
+            const newSession = await createNewSession(true); 
+            if (newSession) currentSessionId = newSession.id;
+            await loadChatSession(currentSessionId);
+        }
+
+        async function fetchAllSessions() {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/session`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await response.json();
+                return data.ok ? data.sessions : [];
+            } catch (error) { console.error('Error fetching sessions:', error); return []; }
+        }
+        
+        async function createNewSession(reloadList = true) {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/session`, {
+                    method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: 'New Chat' })
+                });
+                const data = await response.json();
+                if (data.ok) {
+                    if (reloadList) renderChatList(data.sessions);
+                    return data.session;
+                }
+                return null;
+            } catch (error) { console.error('Error creating new session:', error); return null; }
+        }
+
+        async function loadChatSession(sessionId) {
+            if (!sessionId) return resetChatUI();
+            const token = localStorage.getItem('token');
+            document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+            const activeEl = document.querySelector(`.chat-item[data-session-id="${sessionId}"]`);
+            if (activeEl) activeEl.classList.add('active');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/session/${sessionId}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await response.json();
+                if (data.ok) {
+                    currentSessionId = sessionId;
+                    document.getElementById('message-input').disabled = false;
+                    renderMessages(data.session.messages);
+                    updateChatButtonState();
+                } else { resetChatUI(); }
+            } catch (error) { console.error('Error loading session details:', error); resetChatUI(); }
+        }
+
+        async function sendMessage(e) {
+            e.preventDefault();
+            if (!currentSessionId) return;
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+            if (!message) return;
+            const messagesContainer = document.getElementById('messages-container');
+            const isFirstMessage = messagesContainer.querySelector('#initial-welcome-redesign') !== null || messagesContainer.children.length === 0;
+            addMessageToUI({ role: 'user', content: message, ts: Date.now() });
+            messageInput.value = '';
+            messageInput.style.height = 'auto'; // Reset textarea height
+            updateChatButtonState();
+            if (isFirstMessage) autoRenameSession(currentSessionId, message);
+            
+            const thinkingIndicator = document.createElement('div');
+            thinkingIndicator.id = 'ai-thinking-indicator';
+            thinkingIndicator.className = 'flex items-center mb-3 slide-in-left';
+            thinkingIndicator.innerHTML = `
+                <img src="https://files.catbox.moe/ekxl3e.png" alt="AI Logo" class="w-4 h-4 object-contain mr-2">
+                <span class="text-[#a1a1aa] text-sm flex items-center">
+                    AI is thinking<span class="dot-animation ml-1 flex"><span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>
+                </span>`;
+
+            messagesContainer.appendChild(thinkingIndicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chat/${currentSessionId}/message`, {
+                    method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                addMessageToUI(data.ok ? data.message : { role: 'assistant', content: 'Sorry, I encountered an error.', ts: Date.now() });
+            } catch (error) { addMessageToUI({ role: 'assistant', content: 'Network error. Please try again.', ts: Date.now() }); } 
+            finally {
+                const indicator = document.getElementById('ai-thinking-indicator');
+                if (indicator) indicator.remove();
+            }
+        }
+
+        function renderChatList(sessions) {
+            const sessionsList = document.getElementById('chat-sessions-list');
+            sessionsList.innerHTML = '';
+            if (!sessions || sessions.length === 0) {
+                sessionsList.innerHTML = `<p class="text-center text-[#a1a1aa] text-sm p-4">No chats yet.</p>`; return;
+            }
+            sessions.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach((session, index) => {
+                const sessionElement = createSessionElement(session);
+                sessionsList.appendChild(sessionElement);
+                gsap.from(sessionElement, { opacity: 0, x: -20, duration: 0.3, delay: index * 0.05 });
+            });
+        }
+        
+        function createSessionElement(session) {
+            const div = document.createElement('div');
+            div.className = 'p-3 mb-2 rounded-lg cursor-pointer chat-item bg-[#262626]';
+            div.dataset.sessionId = session.id; div.dataset.title = session.title;
+            div.innerHTML = `<div class="flex justify-between items-center"><div class="flex-1 min-w-0"><h3 class="font-semibold text-sm text-[#f5f5f5] truncate">${session.title}</h3><p class="text-xs text-[#a1a1aa]">${new Date(session.createdAt).toLocaleDateString()}</p></div><div class="chat-item-actions flex space-x-2 pl-2"><button class="rename-btn chat-action-btn ripple p-1 text-[#a1a1aa]" title="Rename"><i class="fas fa-edit fa-xs"></i></button><button class="delete-btn chat-action-btn ripple p-1 text-[#a1a1aa]" title="Delete"><i class="fas fa-trash fa-xs"></i></button></div></div>`;
+            div.addEventListener('click', e => !e.target.closest('.chat-item-actions') && (window.innerWidth < 768 && toggleSidebar(), loadChatSession(session.id)));
+            div.querySelector('.rename-btn').addEventListener('click', e => { e.stopPropagation(); handleRenameClick(session.id, session.title); });
+            div.querySelector('.delete-btn').addEventListener('click', e => { e.stopPropagation(); handleDeleteClick(session.id); });
+            return div;
+        }
+
+        function renderMessages(messages) {
+            const messagesContainer = document.getElementById('messages-container');
+            if (!messages || messages.length === 0) {
+                showInitialWelcomeMessage(); return;
+            }
+            messagesContainer.innerHTML = '';
+            messages.forEach(message => addMessageToUI(message, false));
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function showInitialWelcomeMessage() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const messagesContainer = document.getElementById('messages-container');
+            messagesContainer.innerHTML = `
+                <div id="initial-welcome-redesign" class="flex flex-col items-center justify-center h-full text-center px-4 -mt-8">
+                    <div id="welcome-content" class="opacity-0">
+                        <h2 class="text-3xl md:text-4xl font-bold text-[#f5f5f5] mb-8">
+                            Welcome ${user.username || 'Guest'} <span class="wave-emoji">👋</span> selamat datang di Kynay AI!
+                        </h2>
+
+                        <!-- Dropdown -->
+                        <div class="relative inline-block text-left mb-6" id="category-dropdown-container">
+                            <div>
+                                <button type="button" id="dropdown-toggle" class="inline-flex justify-center w-full rounded-lg border border-[#333333] shadow-sm px-4 py-2 bg-[#18181b] text-sm font-medium text-[#f5f5f5] hover:bg-[#262626] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white transition-all duration-200">
+                                    <i data-lucide="more-horizontal" class="mr-2 h-5 w-5"></i>
+                                    Pilih Kategori Chat
+                                    <i data-lucide="chevron-down" class="ml-2 -mr-1 h-5 w-5"></i>
+                                </button>
+                            </div>
+                            <div id="dropdown-panel" class="origin-top-right absolute right-0 mt-2 w-56 rounded-lg shadow-lg bg-[#18181b] ring-1 ring-black ring-opacity-5 focus:outline-none hidden z-10" role="menu">
+                                <div class="py-1" role="none">
+                                    <a href="#" class="dropdown-item" data-prompt="Bantu Pekerjaan saya"><i data-lucide="briefcase" class="mr-3"></i> Kerja</a>
+                                    <a href="#" class="dropdown-item" data-prompt="Jelaskan konsep machine learning"><i data-lucide="book" class="mr-3"></i> Belajar</a>
+                                    <a href="#" class="dropdown-item" data-prompt="Rekomendasikan game open-world terbaik"><i data-lucide="gamepad-2" class="mr-3"></i> Hiburan</a>
+                                    <a href="#" class="dropdown-item" data-prompt="Berikan tips untuk menjaga kesehatan mental"><i data-lucide="heart" class="mr-3"></i> Kesehatan</a>
+                                    <a href="#" class="dropdown-item" data-prompt="Apa itu quantum computing?"><i data-lucide="cpu" class="mr-3"></i> Teknologi</a>
+                                    <a href="#" class="dropdown-item" data-prompt="Buat strategi marketing untuk produk baru"><i data-lucide="bar-chart-2" class="mr-3"></i> Bisnis</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Category Buttons -->
+                        <div class="grid grid-cols-1 gap-4 max-w-3xl mx-auto">
+                            <!-- Baris 1: Soal Matematika full width -->
+                            <button class="category-button-main w-full" data-prompt="Tolong buatkan dan selesaikan 1 soal matematika tentang integral.">
+                                <i data-lucide="calculator" class="mr-3"></i> Soal Matematika
+                            </button>
+                            <!-- Baris 2: Web Dev dan Tulis Artikel -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button class="category-button-main" data-prompt="Bantu saya dalam pengembangan web">
+                                    <i data-lucide="code" class="mr-3"></i> Web Dev
+                                </button>
+                                <button class="category-button-main" data-prompt="Tuliskan sebuah artikel singkat tentang manfaat membaca buku.">
+                                    <i data-lucide="file-text" class="mr-3"></i> Tulis Artikel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                .dropdown-item {
+                    display: flex;
+                    align-items: center;
+                    color: #f5f5f5;
+                    padding: 0.75rem 1rem;
+                    font-size: 0.875rem;
+                    transition: background-color: 0.2s;
+                }
+                .dropdown-item:hover { background-color: #262626; }
+                .dropdown-item i { width: 1rem; height: 1rem; }
+
+                .category-button-main {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: #262626;
+                    color: #f5f5f5;
+                    padding: 1rem;
+                    border-radius: 0.75rem; /* rounded-xl */
+                    font-weight: 500;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    position: relative;
+                    overflow: hidden;
+                }
+                 .category-button-main:hover {
+                    background-color: #333333;
+                    transform: translateY(-2px);
+                    box-shadow: 0 7px 10px rgba(0,0,0,0.15);
+                 }
+                .category-button-main:before {
+                    content: ""; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                    width: 0; height: 0; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+                    border-radius: 50%; transition: width 0.4s ease, height 0.4s ease;
+                }
+                .category-button-main:hover:before { width: 250%; height: 250%; }
+                .category-button-main i { width: 1.25rem; height: 1.25rem; }
+            `;
+            messagesContainer.appendChild(style);
+
+
+            lucide.createIcons();
+            setupWelcomeInteractions();
+
+            gsap.fromTo("#welcome-content", 
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, duration: 0.8, ease: "power3.out", delay: 0.2 }
+            );
+        }
+
+        function setupWelcomeInteractions() {
+            const dropdownToggle = document.getElementById('dropdown-toggle');
+            const dropdownPanel = document.getElementById('dropdown-panel');
+            const messageInput = document.getElementById('message-input');
+            const messageForm = document.getElementById('message-form');
+
+            if (!dropdownToggle) return;
+
+            const toggleDropdown = (show) => {
+                if (show) {
+                    dropdownPanel.classList.remove('hidden');
+                    gsap.fromTo(dropdownPanel, 
+                        { opacity: 0, scale: 0.95, y: -10 },
+                        { opacity: 1, scale: 1, y: 0, duration: 0.2, ease: 'power2.out' }
+                    );
+                } else {
+                    gsap.to(dropdownPanel, { 
+                        opacity: 0, scale: 0.95, y: -10, duration: 0.2, ease: 'power2.in', 
+                        onComplete: () => dropdownPanel.classList.add('hidden') 
+                    });
+                }
+            };
+            
+            dropdownToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleDropdown(dropdownPanel.classList.contains('hidden'));
+            });
+
+            document.querySelectorAll('.dropdown-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    messageInput.value = item.dataset.prompt;
+                    updateChatButtonState();
+                    messageInput.focus();
+                    toggleDropdown(false);
+                });
+            });
+
+            document.querySelectorAll('.category-button-main').forEach(button => {
+                button.addEventListener('click', () => {
+                    messageInput.value = button.dataset.prompt;
+                    updateChatButtonState();
+                    messageForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+                });
+            });
+
+            window.addEventListener('click', (e) => {
+                if (!document.getElementById('category-dropdown-container')?.contains(e.target)) {
+                    if (!dropdownPanel.classList.contains('hidden')) {
+                        toggleDropdown(false);
+                    }
+                }
+            });
+        }
+
+        function addMessageToUI(message, shouldScroll = true) {
+            const messagesContainer = document.getElementById('messages-container');
+            const initialWelcome = document.getElementById('initial-welcome-redesign');
+            if (initialWelcome) initialWelcome.remove();
+            
+            const div = document.createElement('div');
+            const isUser = message.role === 'user';
+            div.className = `flex ${isUser ? 'justify-end' : 'justify-start items-start'} mb-4 w-full`;
+            
+            if (isUser) {
+                div.innerHTML = `<div class="max-w-prose p-4 chat-bubble-user slide-in-right"><p class="text-sm whitespace-pre-wrap">${message.content.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p><p class="text-xs opacity-70 mt-2 text-right">${new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p></div>`;
+            } else {
+                const formattedContent = formatAIResponse(message.content);
+                div.innerHTML = `
+                    <img src="https://files.catbox.moe/ekxl3e.png" alt="AI Logo" class="w-6 h-6 object-contain mr-3 flex-shrink-0 mt-1">
+                    <div class="ai-response flex-1 min-w-0">
+                        ${formattedContent}
+                        <div class="timestamp">${new Date(message.ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>`;
+            }
+            messagesContainer.appendChild(div);
+            if (shouldScroll) messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function resetChatUI() {
+            currentSessionId = null;
+            document.getElementById('message-input').disabled = true;
+            document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+            showInitialWelcomeMessage();
+            updateChatButtonState();
+        }
+        
+        function handleRenameClick(sessionId, currentTitle) {
+            const modal = document.getElementById('rename-chat-modal');
+            const titleInput = document.getElementById('chat-title');
+            titleInput.value = currentTitle; modal.dataset.sessionId = sessionId;
+            modal.classList.remove('hidden');
+            gsap.to(modal, { opacity: 1, duration: 0.3 });
+            gsap.to(modal.querySelector('div'), { scale: 1, duration: 0.3, ease: 'back.out(1.7)' });
+        }
+        
+        async function handleRenameSubmit(e) {
+            e.preventDefault();
+            const modal = document.getElementById('rename-chat-modal');
+            const newTitle = document.getElementById('chat-title').value.trim();
+            if (!newTitle) return;
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/session/${modal.dataset.sessionId}`, {
+                    method: 'PUT', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: newTitle })
+                });
+                const data = await response.json();
+                if (data.ok) {
+                    renderChatList(data.sessions); hideRenameChatModal();
+                    showToast('success', 'Chat renamed successfully!');
+                } else { showToast('error', 'Failed to rename chat.'); }
+            } catch (error) { console.error("Rename failed:", error); showToast('error', 'An error occurred.'); }
+        }
+        
+        function hideRenameChatModal() {
+            const modal = document.getElementById('rename-chat-modal');
+            gsap.to(modal.querySelector('div'), { scale: 0.95, duration: 0.2, ease: 'power2.in' });
+            gsap.to(modal, { opacity: 0, duration: 0.2, onComplete: () => modal.classList.add('hidden') });
+        }
+        
+        function handleDeleteClick(sessionId) {
+            const modal = document.getElementById('delete-chat-modal');
+            modal.dataset.sessionId = sessionId; modal.classList.remove('hidden');
+            gsap.to(modal, { opacity: 1, duration: 0.3 });
+            gsap.to(modal.querySelector('div'), { scale: 1, duration: 0.3, ease: 'back.out(1.7)' });
+        }
+        
+        function hideDeleteChatModal() {
+            const modal = document.getElementById('delete-chat-modal');
+            gsap.to(modal.querySelector('div'), { scale: 0.95, duration: 0.2, ease: 'power2.in' });
+            gsap.to(modal, { opacity: 0, duration: 0.2, onComplete: () => modal.classList.add('hidden') });
+        }
+        
+        async function deleteSession(sessionId) {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/session/${sessionId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
+                const data = await response.json();
+                if (data.ok) {
+                    showToast('success', 'Chat deleted successfully.');
+                    const deletedElement = document.querySelector(`.chat-item[data-session-id="${sessionId}"]`);
+                    if(deletedElement) {
+                        gsap.to(deletedElement, { opacity: 0, x: -20, duration: 0.3, onComplete: () => {
+                           renderChatList(data.sessions); 
+                           if (currentSessionId === sessionId) initializeDashboardOnReload();
+                        }});
+                    }
+                } else { showToast('error', 'Failed to delete chat.'); }
+            } catch (error) { console.error("Delete failed:", error); showToast('error', 'An error occurred.'); }
+        }
+
+        async function autoRenameSession(sessionId, newTitle) {
+            const token = localStorage.getItem('token');
+            const truncatedTitle = newTitle.substring(0, 50);
+            try {
+                await fetch(`${API_BASE_URL}/api/session/${sessionId}`, {
+                    method: 'PUT', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: truncatedTitle })
+                });
+                const chatItem = document.querySelector(`.chat-item[data-session-id="${sessionId}"] h3`);
+                if (chatItem) chatItem.textContent = truncatedTitle;
+            } catch (error) { console.error("Auto-rename failed:", error); }
+        }
+
+        function setupSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return document.getElementById('mic-btn').style.display = 'none';
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; recognition.lang = 'id-ID'; recognition.interimResults = false;
+            recognition.onresult = e => {
+                document.getElementById('message-input').value += e.results[0][0].transcript;
+                updateChatButtonState();
+            };
+            recognition.onspeechend = stopRecognition;
+            recognition.onerror = e => { console.error('Speech recognition error:', e.error); stopRecognition(); };
+        }
+        
+        function handleMicClick() {
+            if (!recognition) return;
+            const micBtn = document.getElementById('mic-btn');
+            const isRecording = micBtn.classList.contains('recording');
+            if (isRecording) {
+                stopRecognition();
+            } else {
+                recognition.start();
+                micBtn.classList.add('recording', 'bg-red-500/20', 'text-red-400');
+                micBtn.classList.remove('hover:bg-[#333333]');
+            }
+        }
+
+        function stopRecognition() {
+             if (!recognition) return;
+             recognition.stop();
+             const micBtn = document.getElementById('mic-btn');
+             micBtn.classList.remove('recording', 'bg-red-500/20', 'text-red-400');
+             micBtn.classList.add('hover:bg-[#333333]');
+             updateChatButtonState();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('toggle-auth-mode').addEventListener('click', toggleAuthMode);
+            document.getElementById('auth-form').addEventListener('submit', handleAuth);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            document.getElementById('sidebar-toggle').addEventListener('click', toggleSidebar);
+            document.getElementById('sidebar-overlay').addEventListener('click', toggleSidebar);
+            document.getElementById('new-chat-btn').addEventListener('click', handleNewChatClick);
+            document.getElementById('search-chats-input').addEventListener('input', searchChats);
+            document.getElementById('message-form').addEventListener('submit', sendMessage);
+            document.getElementById('mic-btn').addEventListener('click', handleMicClick);
+            
+            const messageInput = document.getElementById('message-input');
+            
+            messageInput.addEventListener('input', () => {
+                messageInput.style.height = 'auto';
+                messageInput.style.height = `${messageInput.scrollHeight}px`;
+                updateChatButtonState();
+            });
+
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById('message-form').requestSubmit();
+                }
+            });
+
+            document.getElementById('rename-chat-form').addEventListener('submit', handleRenameSubmit);
+            document.getElementById('cancel-rename-chat').addEventListener('click', hideRenameChatModal);
+            document.getElementById('cancel-delete-chat').addEventListener('click', hideDeleteChatModal);
+            document.getElementById('confirm-delete-chat').addEventListener('click', () => {
+                const modal = document.getElementById('delete-chat-modal');
+                const sessionId = modal.dataset.sessionId;
+                if (sessionId) { deleteSession(sessionId); }
+                hideDeleteChatModal();
+            });
+        }
+
+        function toggleAuthMode() {
+            const authContent = document.getElementById('auth-content');
+            gsap.to(authContent, { opacity: 0, y: -20, duration: 0.2, ease: 'power2.in', onComplete: () => {
+                isRegistering = !isRegistering;
+                document.querySelector('#auth-button .button-text').textContent = isRegistering ? 'Register' : 'Sign In';
+                document.getElementById('toggle-auth-mode').textContent = isRegistering ? 'Already have an account? Sign in' : 'Need an account? Register';
+                document.getElementById('auth-form').reset(); clearInputErrors();
+                gsap.fromTo(authContent, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' });
+            }});
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            isSidebarOpen = !isSidebarOpen;
+            if (isSidebarOpen) {
+                sidebar.classList.remove('-translate-x-full');
+                if (window.innerWidth < 768) overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+        
+        function searchChats() {
+            const searchTerm = document.getElementById('search-chats-input').value.toLowerCase();
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.style.display = item.dataset.title.toLowerCase().includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        function handleResize() {
+            if (window.innerWidth >= 768) {
+                document.getElementById('sidebar').classList.remove('-translate-x-full');
+                document.getElementById('sidebar-overlay').classList.add('hidden');
+                isSidebarOpen = true;
+            } else {
+                if(isSidebarOpen) {
+                    document.getElementById('sidebar').classList.add('-translate-x-full');
+                    isSidebarOpen = false;
+                }
+            }
+        }
+
+        function setupRippleEffects() {
+            document.addEventListener('click', function(e) {
+                // Modified to not conflict with new button styles
+                const target = e.target.closest('.ripple:not(.btn-clean):not(.btn-chat)');
+                if (target) {
+                    const rect = target.getBoundingClientRect();
+                    const ripple = document.createElement('span');
+                    ripple.className = 'ripple-effect';
+                    ripple.style.left = `${e.clientX - rect.left}px`;
+                    ripple.style.top = `${e.clientY - rect.top}px`;
+                    target.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 600);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
