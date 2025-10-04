@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   const path = parsedUrl.pathname.replace(/^\/api/, "");
 
   // Gabung dengan alamat VPS
-  const backendUrl = "http://yoztampan.xintzy.me:2669" + path;
+  const backendUrl = "http://danzx-hosting.storedigital.web.id:3756" + path;
   console.log("Forwarding to:", backendUrl);
 
   try {
