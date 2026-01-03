@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   const path = parsedUrl.pathname.replace(/^\/api/, "");
 
   // Gabung dengan alamat VPS
-  const backendUrl = "http://private-server.privatserver.my.id:2027" + path;
+  const backendUrl = "https://server-production-00aa.up.railway.app" + path;
   console.log("Forwarding to:", backendUrl);
 
   try {
